@@ -21,6 +21,9 @@ def isAdmin(user):
 	adminIDList = [adminReg["ID"] for adminReg in list(mongoClient.DBot.config.find({"type": "adminRegistry"}))]
 	return user.id in adminIDList
 
+async def inssuficientPermissions(ctx):
+	await ctx.send("{}, you have inssuficient permissions.".format(ctx.message.author.mention))
+
 def timeNow():
 	return datetime.datetime.now(tz=TIMEZONE)
 
