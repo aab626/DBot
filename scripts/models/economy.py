@@ -53,7 +53,7 @@ class EcoProfile:
 	def changeBalance(changeAmount):
 		if self.checkBalance(changeAmount):
 			self.balance += changeAmount
-			dbClient.getClient().DBot.economy.update_one({"user.id": self,user.id}, {"$set": {"balance": self.balance}})
+			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"balance": self.balance}})
 			return 0
 		else:
 			return -1
@@ -67,6 +67,7 @@ class EcoProfile:
 	def collect(self):
 		if self._ableToCollect():
 			self.changeBalance(COLLECTION_MONEY)
+			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"timeCollection": timeNow().isoformat()}})
 			return 0
 		else:
 			return -1

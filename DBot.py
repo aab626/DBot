@@ -28,7 +28,7 @@ import scripts.autism_commands_bot as autism_cb
 
 # Set prefix and load token
 COMMAND_PREFIX = ">"
-with io.open("token", "r", encoding="utf-8") as f:
+with io.open(os.path.join(os.getcwd(), "keys", "token.secret"), "r", encoding="utf-8") as f:
 	TOKEN = f.read()
 
 # Check and/or create folders

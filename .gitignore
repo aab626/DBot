@@ -1,6 +1,5 @@
-# Project-wide files
-mongo
-token
+# Secret keys
+*.secret
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
