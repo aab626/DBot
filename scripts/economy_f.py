@@ -1,8 +1,13 @@
+from scripts.models.economy import *
+from scripts.economy_fAux import *
+
 from scripts.helpers.aux_f import *
 from scripts.helpers.dbClient import *
+from scripts.helpers.eventManager import *
 
 import datetime
 import random
+import pymongo
 
 ############
 # CONSTANTS
@@ -24,174 +29,132 @@ COLLECT_AMOUNT = 5
 ###########
 # FUNCTIONS
 
-##################################
-# GENERAL ECONOMY FUNCTIONS
-
-# Returns a string, with the standard money format
-# modes:
-# simple	$12
-# verbose	12 dollars | 1 dollar
-def pMoney(amount, mode="simple"):
-	# verbose
-	if mode == "verbose":
-		return "{} {}".format(amount, CURRENCY_NAME_PLURAL if amount > 1 else CURRENCY_NAME_SINGULAR)
-	# simple (default)
-	else:
-		return "{} {}".format(amount, CURRENCY_SYMBOL)
-
-####################################
-# ECONOMY PROFILE RELATED FUNCTIONS
-
-# creates an economy profile for an user
-# return codes
-# 0		ok
-# -1	user already has profile
-def createEconomyProfile(user):
-	if checkEconomyProfile(user) == False:
-		profile = {	"id": user.id,
-					"name": user.name,
-					"balance": STARTING_BALANCE,
-					"createTime": timeNow().isoformat(),
-					"collectTime": timeNow().isoformat(),
-					"locked": False}
-
-		mongoClient = dbClient.getClient()
-		mongoClient.DBot.economy.insert_one(profile)
-		return 0
-	else:
-		return -1
-
-# returns true if the user has an economy profile, false otherwise
-def checkEconomyProfile(user):
-	mongoClient = dbClient.getClient()
-	count = mongoClient.DBot.economy.count_documents({"id": user.id})
-
-	if count == 0:
-		return False
-	else:
-		return True
-
-# returns the economy profile for an user
-# if the user didnt had a profile, creates one before returning it
-def getEconomyProfile(user):
-	if checkEconomyProfile(user) == False:
-		createEconomyProfile(user)
-
-	mongoClient = dbClient.getClient()
-	profile = mongoClient.DBot.economy.find_one({"id": user.id})
-
-	return profile
-
-# changes the balance of an user by an amount
-# error codes
-# 0		ok
-# -1	user does not have a profile
-def changeBalance(user, changeAmount):
-	if checkEconomyProfile(user) == True:
-		mongoClient = dbClient.getClient()
-		mongoClient.DBot.economy.update_one({"id": user.id}, {"$inc": {"balance": changeAmount}})
-		return 0
-	else:
-		return -1
-
-# returns true if the user has enough funds in their economy profile, false otherwise
-def checkBalance(user, amount):
-	profile = getEconomyProfile(user)
-	return profile["balance"] >= amount
-
-####################################
-# LOTTERY COMMAND RELATED FUNCTIONS
-
-# Generates a ticket for the lottery
-def generateTicket():
-	ticket = []
-	while len(ticket) < LOTTERY_NUMBERS_TO_DRAW:
-		n = random.randint(1, LOTTERY_NUMBERS_IN_POOL)
-		if n in ticket:
-			continue
+def balance_f(ctx, targetUser):
+	if userMentioned != None:
+		if isAdmin(ctx.author):
+			targetUser = userMentioned
 		else:
-			ticket.append(n)
-	
-	ticket.sort()
-	return ticket
+			return -1
+	else:
+		targetUser = ctx.author
 
-# returns the quantity of number that are in both tickets (hits)
-def checkTicket(ticket, winningTicket):
-	hits = sum([1 if t in winningTicket else 0 for t in ticket])
-	return hits
+	profile = EcoProfile.load(targetUser)
 
-def gameLottery(gamesToPlay):
-	winningTicket = generateTicket()
+	embedTitle = "{}'s Balance".format(profile.user.name)
+	embedDescription = pMoney(profile.balance)
+	embed = discord.Embed(title=embedTitle, description=embedDescription)
+	return embed
 
-	lotteryReport = {"winningTicket": winningTicket, "games": []}
-	for i in range(gamesToPlay):
-		ticket = generateTicket()
-		hits = checkTicket(ticket, winningTicket)
-		prize = LOTTERY_PRIZE_DICTIONARY[hits] if hits in LOTTERY_PRIZE_DICTIONARY.keys() else 0
-
-		lotteryDict = {"ticket": ticket, "hits": hits, "prize": prize}
-		lotteryReport["games"].append(lotteryDict)
-
-	return lotteryReport
-
-#############################################
-# COLLECT COMMAND RELATED FUNCTIONS
-
-# Checks if an user is able to use the daily collect command
-# error codes
-# (True, 0)		ok
-# (False, -1)	user has created profile in the same day
-# (False, -2)	user has already collected today
-def ableToCollect(user):
-	profile = getEconomyProfile(user)
-	tCreated = datetime.datetime.fromisoformat(profile["createTime"])
-	dateCreated = datetime.date.fromtimestamp(tCreated.timestamp())
-
-	if dateCreated == dateNow():
+def lottery_f(user, gamesToPlay):
+	if gamesToPlay > LOTTERY_MAX_GAMES_ALLOWED:
 		return -1
 
-	tCollected = datetime.datetime.fromisoformat(profile["collectTime"])
-	dateCollected = datetime.date.fromtimestamp(tCollected.timestamp())
-	if dateCollected == dateNow():
+	profile = EcoProfile.load(user)
+	if profile.isLocked():
 		return -2
 
-	return 0
+	totalCost = LOTTERY_COST * gamesToPlay
+	if not profile.checkBalance(totalCost):
+		return -3
 
-# adds a daily collection amount to an user balance
-# error codes
-# 0		ok
-# -1	user has created profile in the same day
-# -2	user has already collected today
-def dailyCollect(user):
-	code = ableToCollect(user)
-	if code == 0:
-		changeBalance(user, COLLECT_AMOUNT)
-		mongoClient = dbClient.getClient()
-		mongoClient.DBot.economy.update_one({"id": user.id}, {"$set": {"collectTime": timeNow().isoformat()}})
-		return 0
+	# When all checks pass, lock the profile
+	profile.lock()
+
+	# Play lottery and assemble report embed
+	lotteryReport = gameLottery(gamesToPlay)
+	ticketStrings = []
+	for game in lotteryReport["games"]:
+		ticketStr = "{}: `[{}] ({})` | Prize: {}".format(str(lotteryReport["games"].index(game)+1).zfill(2),
+														 "-".join([str(t).zfill(2) for t in game["ticket"]]),
+														 str(game["hits"]).zfill(2),
+														 game["prize"])
+		ticketStrings.append(ticketStr)
+
+	totalPrize = sum([game["prize"] for game in lotteryReport["games"]])
+	totalChange = totalPrize - totalCost
+	if totalChange > 0:
+		resultStr = "You won {}!".format(pMoney(totalChange))
+	elif totalChange < 0:
+		resultStr = "You just lost {} haha".format(pMoney(abs(totalChange)))
 	else:
-		return code
+		resultStr = "You didn't win or lose anything"
 
-def ecoLock(user):
-	# Ensure eco profile is created
-	getEconomyProfile(user)
-	# Lock profile
+	embed = discord.Embed(title="Lottery", description="Winning ticket: `[{}]`".format("-".join([str(t).zfill(2) for t in lotteryReport["winningTicket"]])))
+	embed.add_field(name="Tickets", value="\n".join(ticketStrings), inline=False)
+	embed.add_field(name="Results", value="Total Prize: {}\n".format(totalPrize)+resultStr, inline=False)
+	if totalChange == 0:
+		embed.set_footer(text="Booooooooooring")
+
+	# Make balance changes and unlock profile
+	profile.changeBalance(-totalCost)
+	if totalPrize > 0:
+		profile.changeBalance(totalPrize)
+	profile.unlock()
+
+	return embed
+
+def collect_f(user):
+	profile = EcoProfile.load(user)
+	code = profile.collect()
+	if code == -1:
+		return -1
+	elif code == 0:
+		embedTitle = "Welfare Collected!"
+		embedDescription = "You just collected your daily {}".format(pmoney(COLLECTION_MONEY))
+		embed = discord.Embed(title=embedTitle, description=embedDescription)
+		return embed
+
+def claim_f(user):
+	evManager = eventManager.getEventManager()
+	claimEvent = evManager.getEvent("claim")
+
+	if not claimEvent.isRunning():
+		return -1
+	elif user in claimEvent.users:
+		return -2
+	else:
+		claimEvent.users.append(user)
+		return 0
+
+def pay_f(originUser, destinationUser, amount):
+	if amount <= 0:
+		return -1
+
+	originProfile = EcoProfile.load(originUser)
+	if originProfile.isLocked():
+		return -2
+
+	destinationProfile = EcoProfile.load(destinationUser)
+	if destinationProfile.isLocked():
+		return -3
+
+	if not originProfile.checkBalance(amount):
+		return -4
+
+	originProfile.lock()
+	originProfile.changeBalance(-amount)
+	originProfile.unlock()
+
+	destinationProfile.lock()
+	destinationProfile.changeBalance(amount)
+	destinationProfile.unlock()
+
+	embedTitle = "Successful transaction"
+	embedDescription = "{} just sent {} to {}.".format(originUser.name, pMoney(amount), destinationUser.name)
+	embed = discord.Embed(title=embedTitle, description=embedDescription)
+	return embed
+
+def ranking_f():
+	embed = discord.Embed(title="Economy Ranking", description="Top 5 based on total Balance.") 
+	
 	mongoClient = dbClient.getClient()
-	mongoClient.DBot.economy.find({"id": user.id}, {"$set": {"locked": True}})
+	ecoDocs = list(mongoClient.DBot.economy.find({}).sort("balance", pymongo.DESCENDING))
 
-def ecoUnlock(user):
-	# Ensure eco profile is created
-	getEconomyProfile(user)
-	# Unlock profile
-	mongoClient = dbClient.getClient()
-	mongoClient.DBot.economy.find({"id": user.id}, {"$set": {"locked": False}})
-
-def isEcoLocked(user):
-	ecoProfile = getEconomyProfile(user)
-	return ecoProfile["locked"]
-
-# Returns a list with the players sorted by descending total balance
-def getEconomyRankingList():
-	mongoClient = dbClient.getClient()
-	ecoProfiles = list(mongoClient.DBot.economy.find({}).sort("balance", pymongo.DESCENDING))
-	return ecoProfiles
+	selectedDocs = ecoDocs[:5]
+	for ecoDoc in selectedDocs:
+		profile = EcoProfile.load(ecoDoc["user"]["id"])
+		fieldName = "{}/{}: {}".format(selectedDocs.index(ecoDoc)+1, len(selectedDocs), profile.user.name)
+		fieldValue = "Balance: {}".format(pMoney(profile.balance))
+		embed.add_field(name=fieldName, value=fieldValue)
+	
+	return embed

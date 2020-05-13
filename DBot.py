@@ -51,7 +51,7 @@ async def on_ready():
 	bot.add_cog(random_c.Random(bot, eventChannel))
 	bot.add_cog(google_c.Google(bot, eventChannel))
 	bot.add_cog(basic_c.Basic(bot, eventChannel))
-	bot.add_cog(economy_c.Economy(bot, eventChannel))
+	bot.add_cog(economy_c.Economy(eventChannel))
 	bot.add_cog(waifu_c.Waifu(bot, eventChannel))
 	bot.add_cog(autism_c.Autism(eventChannel))
 	bot.add_cog(admin_c.Admin(eventChannel))
