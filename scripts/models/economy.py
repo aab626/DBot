@@ -3,6 +3,7 @@ from scripts.helpers.aux_f import *
 from scripts.helpers.Bot import *
 
 import datetime
+from bson.codec_options import CodecOptions
 
 #############
 # CONSTANTS
@@ -26,7 +27,8 @@ class EcoProfile:
 	@staticmethod
 	def load(user):
 		mongoClient = dbClient.getClient()
-		profileDoc = mongoClient.DBot.economy.find({"user.id": user.id})
+		timeAware_Collection = mongoClient.DBot.economy.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
+		profileDoc = timeAware_Collection.find({"user.id": user.id})
 
 		if profileDoc is None:
 			user = user
@@ -67,7 +69,7 @@ class EcoProfile:
 	def collect(self):
 		if self._ableToCollect():
 			self.changeBalance(COLLECTION_MONEY)
-			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"timeCollection": timeNow().isoformat()}})
+			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"timeCollection": timeNow()}})
 			return 0
 		else:
 			return -1
@@ -89,8 +91,8 @@ class EcoProfile:
 	def _makeDoc(self):
 		profileDoc = {"user": {"name": self.user.name, "id": self.user.id},
 					  "balance": self.balance,
-					  "timeCreation": self.timeCreation.isoformat(),
-					  "timeCollection": self.timeCollection.isoformat(),
+					  "timeCreation": self.timeCreation,
+					  "timeCollection": self.timeCollection,
 					  "lock": self._lock
 					  }
 

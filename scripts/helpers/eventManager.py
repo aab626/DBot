@@ -1,4 +1,4 @@
-class eventManager:
+class EventManager:
 	__instance = None
 
 	def __init__(self):

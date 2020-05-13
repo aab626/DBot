@@ -34,7 +34,10 @@ def timeNow():
 	return datetime.datetime.now(tz=TIMEZONE)
 
 def dateNow():
-	return datetime.date.fromtimestamp(timeNow().timestamp())
+	return timeToDate(timeNow())
+
+def timeToDate(time)
+	return datetime.date.fromisoformat(time.strftime("%Y-%m-%d"))
 
 def log(toLog):
 	timeStamp = timeNow().strftime("[%H:%M:%S]")
