@@ -1,19 +1,61 @@
+import discord
+
+from scripts.autism_fAux import *
+
 from scripts.helpers.aux_f import *
 from scripts.helpers.dbClient import *
+from scripts.helpers.eventManager import *
+from scripts.helpers.Bot import *
 
-import random
 from PIL import Image, GifImagePlugin
+import random
 import string
 import os
 import time
 
-def getIsakPhrase(ctx):
-	phase1List = ["pucha no puedo", 
-				  "justo ahora estoy ocupado", 
-				  "ahora lo veo dificil", 
-				  "lo siento ahora no", 
-				  "pucha no creo que pueda", 
-				  "aaahhh no no puedo"]
+def letter_moment(message):
+	if len(message.content) == 2:
+		if message.content[0] == Bot.getBot().command_prefix and message.content[1] in string.ascii_uppercase:
+			msgDict = letterMoment(message)
+			return msgDict
+	else:
+		return -1
+
+def callate_f(message):
+	if message.content.startswith(">"):
+		return -1
+
+	# 1 in 128 = 0.0078125
+	r = random.random()
+	if r < 0.0078125:
+		wordList = ["KALALATEEEEE", 
+					"AKALALTE KALALTE KALLATE", 
+					"AKALTE KALATE", 
+					"KALALTE KALLALTEEEE", 
+					"KALLATEEEE", 
+					"KALALTE KALALTE KALLATE", 
+					"CLAKLAATTEEEEEE", 
+					"CAALLATE", 
+					"CALALLLATE AORA", 
+					"KALLATTETEEEEEE", 
+					"CALLLATTE KALLATE KALALATEE", 
+					"KALALT EKALALTE KALLATE KALLATE KALLALTTEEE","KKLALTE Y MATATEEEE", 
+					"KALATLE MATATE KALLTE MATATATEE", 
+					"MATAT ET MATATE MATATEMATATE"]
+
+		word = random.choice(wordList)
+		msg = "{} {}".format(message.author.mention, word)
+		return msg
+	else:
+		return -1
+
+def isak_f(ctx):
+	phase1List = ["Pucha no puedo", 
+				  "Justo ahora estoy ocupado", 
+				  "Ahora lo veo dificil", 
+				  "Ahora no", 
+				  "No creo que pueda", 
+				  "Aaahhh no no puedo"]
 
 	mongoClient = dbClient.getClient()
 	r = random.randint(0, mongoClient.DBot.isak.count_documents({"accepted": True})-1)
@@ -27,112 +69,48 @@ def getIsakPhrase(ctx):
 
 	return "{} porque {} {}".format(random.choice(phase1List), isakDoc["phrase"], emojiStr).strip(" ")
 
-def addIsakPhrase(user, phrase):
-	isakDoc = {"phrase": phrase,
-			   "user": { "ID": user.id,
-			   			 "name": user.name},
-			   "accepted": False}
-
+def isak_add_f(author, phrase):
 	mongoClient = dbClient.getClient()
-	result = mongoClient.DBot.isak.insert_one(isakDoc)
-	return result
-
-def getChochePhrase():
-	mongoClient = dbClient.getClient()
-	r = random.randint(0, mongoClient.DBot.choche.count_documents({"accepted": True})-1)
-	chocheDoc = mongoClient.DBot.choche.find({"accepted": True})[r]
-
-	return chocheDoc["phrase"]
-
-def getHiddenChochePhrase(chochePhrase):
-	chocheSplit = chochePhrase.split(" ")
-	wordsNumber = len(chocheSplit)
-
-	if wordsNumber//3 < 1:
-		wordsToHideN = 1
+	isakDocs = list(mongoClient.DBot.isak.find({}))
+	if phrase in [isakDoc["phrase"] for isakDoc in isakDocs]:
+		return -1
 	else:
-		wordsToHideN = random.randint(1, wordsNumber//3)
+		isakDoc = {"phrase": phrase,
+				   "user": { "ID": author.id,
+				   			 "name": author.name},
+				   "accepted": False}
 
-	wordsToHide = []
-	while len(wordsToHide) < wordsToHideN:
-		randomWord = random.choice(chocheSplit)
-		if randomWord in wordsToHide:
-			continue
+		mongoClient.DBot.isak.insert_one(isakDoc)
+		return 0
+
+def choche_f(ctx):
+	evManager = eventManager.getEventManager()
+	chocheEvent = evManager.getEvent("choche")
+
+	if not chocheEvent.isRunning():
+		return -1
+	else:
+		chocheGuess = " ".join(ctx.message.content.split(" ")[1:])
+		if checkChochePhrase(chocheGuess, chocheEvent.chochePhrase):
+			chocheEvent.winnerUser = ctx.author
+			return 0
 		else:
-			wordsToHide.append(randomWord)
+			return -2
 
-	finalSplit = []
-	for word in chocheSplit:
-		if word in wordsToHide:
-			hiddenWord = "`{}`".format("\U00002588"*len(word))
-			finalSplit.append(hiddenWord)
-		else:
-			finalSplit.append(word)
-
-	hiddenChochePhrase = " ".join(finalSplit)
-	return hiddenChochePhrase
-
-def checkChochePhrase(chocheGuess, chochePhrase):
-	wordsToReplace = [["yutub", "youtube", "yutu", "youtub"],
-					  ["todo", "too"],
-					  ["todos", "toos"],
-					  ["facebook", "feisbuk"],
-					  ["face", "feis"],
-					  ["misterion", "mysterion"],
-					  ["youtubero", "yutubero"],
-					  ["youtuberos", "yutuberos"],
-					  ["youtuber", "yutuber"],
-					  ["youtubers", "yutubers"],
-					  ["de", "del"],
-					  ["le", "les"]]
-
-	chocheGuess = chocheGuess.lower()
-	
-	chocheGuessSplitFix = []
-	for word in chocheGuess.split(" "):
-		i = 0
-		foundReplacement = False
-		for replaceList in wordsToReplace:
-			if word in replaceList:
-				replacement = "%REP_{}%".format(i)
-				chocheGuessSplitFix.append(replacement)
-				foundReplacement = True
-				break
-			i += 1
-
-		if foundReplacement:
-			continue
-		else:
-			chocheGuessSplitFix.append(word)
-
-	chochePhraseSplitFix = []
-	for word in chochePhrase.split(" "):
-		i = 0
-		foundReplacement = False
-		for replaceList in wordsToReplace:
-			if word in replaceList:
-				replacement = "%REP_{}%".format(i)
-				chochePhraseSplitFix.append(replacement)
-				foundReplacement = True
-				break
-			i += 1
-
-		if foundReplacement:
-			continue
-		else:
-			chochePhraseSplitFix.append(word)
-
-	return chocheGuessSplitFix == chochePhraseSplitFix
-
-def addChochePhrase(user, phrase):
-	chocheDoc = {"phrase": phrase,
-			     "user": { "ID": user.id,
-			   			   "name": user.name},
+def choche_add_f(author, phrase):
+	mongoClient = dbClient.getClient()
+	chocheDocs = list(mongoClient.DBot.choche.find({}))
+	if phrase in [chocheDoc["phrase"] for chocheDoc in chocheDocs]:
+		return -1
+	else:
+		chocheDoc = {"phrase": phrase,
+			     "user": { "ID": author.id,
+			   			   "name": author.name},
 			   	 "accepted": False}
 
-	mongoClient = dbClient.getClient()
-	result = mongoClient.DBot.choche.insert_one(chocheDoc)
-	return result
+		mongoClient = dbClient.getClient()
+		mongoClient.DBot.choche.insert_one(chocheDoc)
+		return 0
 
 # Assembles a phrase with dancing letters (gifs)
 # error codes
@@ -140,7 +118,7 @@ def addChochePhrase(user, phrase):
 # -1			phrase too short (min 1 character)
 # -2			phrase too long (max 20 characters)
 # -3			character not valid (only ascii letters and spaces are allowed)
-def makeAutismGif(phrase, user):
+def autism_f(author, phrase):
 	allowedCharacters = string.ascii_lowercase + " "
 	phrase = phrase.lower()
 
@@ -188,15 +166,11 @@ def makeAutismGif(phrase, user):
 		frames.append(imgWordFrame.copy())
 
 	autismFolder = os.path.join(os.getcwd(), "resources", "autism")
-	imageFileName = "{}_{}.gif".format(time.time(), user.id)
+	imageFileName = "{}_{}.gif".format(time.time(), author.id)
 	imageFinalPath = os.path.join(autismFolder, imageFileName)
 	
 	frames[0].save(imageFinalPath, format="GIF", append_images=frames[1:], save_all=True, duration=170, loop=0, version="GIF89a", background=0, transparency=7, disposal=2)
-	return imageFinalPath
 
-def deleteAutism(autismPath):
-	try:
-		os.remove(autismPath)
-		return 0
-	except:
-		return -1
+	# Schedule for deletion in the minute and return path
+	Bot.getBot().loop.create_task(scheduleDeleteFile(imageFinalPath, 15))
+	return discord.File(imageFinalPath)

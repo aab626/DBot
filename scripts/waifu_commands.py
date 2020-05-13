@@ -27,7 +27,7 @@ class Waifu(commands.Cog):
 		self.eventChannel = eventChannel
 
 		# Add the events to the bot's event loop
-		self.waifuAuctionHouseEvent = waifuAuctionHouseEvent(name="waifuAH", bot=self.bot, channel=self.eventChannel,
+		self.waifuAuctionHouseEvent = waifuAuctionHouseEvent(name="waifuAH", channel=self.eventChannel,
 															 minWait=int(2*3600), maxWait=int(4.5*3600), duration=int(1.5*60),
 															 checkWait=60, eventWait=0.1,
 															 activityTimeThreshold=30*60, activityWaitMin=int(1*3600), activityWaitMax=int(1.75*3600),

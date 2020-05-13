@@ -1,9 +1,12 @@
 from scripts.helpers.dbClient import *
+from scripts.helpers.Bot import *
 
 import discord
 import pymongo
 import datetime
 import pytz
+import asyncio
+import os
 
 ###############
 # CONSTANTS
@@ -22,7 +25,10 @@ def isAdmin(user):
 	return user.id in adminIDList
 
 async def inssuficientPermissions(ctx):
-	await ctx.send("{}, you have inssuficient permissions.".format(ctx.message.author.mention))
+	await ctx.send("{}, you have inssuficient permissions.".format(ctx.author.mention))
+
+async def eventNotRunning(ctx):
+	await ctx.send("{}, this event is not running right now.".format(ctx.author.mention))
 
 def timeNow():
 	return datetime.datetime.now(tz=TIMEZONE)
@@ -34,7 +40,7 @@ def log(toLog):
 	timeStamp = timeNow().strftime("[%H:%M:%S]")
 	if type(toLog) == discord.ext.commands.context.Context:
 		ctx = toLog
-		logStr = "{} {}: {}".format(timeStamp, ctx.message.author, ctx.message.content)
+		logStr = "{} {}: {}".format(timeStamp, ctx.author, ctx.message.content)
 	elif type(toLog) == str:
 		logStr = "{} {}: {}".format(timeStamp, "[DBOT INFO]", toLog)
 
@@ -69,9 +75,12 @@ def replaceEventDoc(eventName, newEventDoc):
 	mongoClient = dbClient.getClient()
 	mongoClient.DBot.events.replace_one({"name": eventName}, newEventDoc)
 
-def getEventChannel(bot):
+def getEventChannel():
 	mongoClient = dbClient.getClient()
 	channelRegistryDoc = mongoClient.DBot.config.find_one({"type": "channelRegistry"})
-	channel = bot.get_channel(channelRegistryDoc["channelID"])
+	channel = Bot.getBot().get_channel(channelRegistryDoc["channelID"])
 	return channel
 
+async def scheduleDeleteFile(path, time):
+	await asyncio.sleep(time)
+	os.remove(path)

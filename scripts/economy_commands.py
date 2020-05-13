@@ -16,7 +16,7 @@ class Economy(commands.Cog):
 		self.eventChannel = eventChannel
 
 		# Add the events to the bot's event loop
-		self.claimEvent = claimEvent(name="claim", bot=self.bot, channel=self.eventChannel,
+		self.claimEvent = claimEvent(name="claim", channel=self.eventChannel,
 									 minWait=int(2.5*3600), maxWait=5*3600, duration=120,
 									 checkWait=60, eventWait=0.1,
 									 activityTimeThreshold=30*60, activityWaitMin=int(1*3600), activityWaitMax=int(1.75*3600),

@@ -1,19 +1,20 @@
 from scripts.helpers.aux_f import *
 from scripts.helpers.eventManager import *
+from scripts.helpers.Bot import *
 
 import random
 import asyncio
 
 class Event:
-	def __init__(self, name, bot, channel, 
+	def __init__(self, name, channel, 
 				 minWait, maxWait, duration, 
 				 checkWait, eventWait, 
 				 activityTimeThreshold, activityWaitMin, activityWaitMax):
 		
 		self.name = name
 		self.status = False
+		self.bot = Bot.getBot()
 
-		self.bot = bot
 		self.channel = channel
 
 		self.minWait = minWait

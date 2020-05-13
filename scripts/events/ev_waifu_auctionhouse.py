@@ -7,13 +7,13 @@ import discord
 import random
 
 class waifuAuctionHouseEvent(Event):
-	def __init__(self, name, bot, channel,
+	def __init__(self, name, channel,
 				 minWait, maxWait, duration, 
 				 checkWait, eventWait, 
 				 activityTimeThreshold, activityWaitMin, activityWaitMax,
 				 timeThresholdToExtend, bidTimeExtension):
 
-		super().__init__(name, bot, channel, 
+		super().__init__(name, channel, 
 						 minWait, maxWait, duration, 
 						 checkWait, eventWait, 
 						 activityTimeThreshold, activityWaitMin, activityWaitMax)

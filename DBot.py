@@ -14,6 +14,8 @@ os.chdir(os.path.split(os.path.abspath(__file__))[0])
 
 # Commands
 import scripts.helpers.aux_f as aux
+from scripts.helpers.Bot import *
+
 import scripts.random_commands as random_c
 import scripts.google_commands as google_c
 import scripts.basic_commands as basic_c
@@ -33,7 +35,7 @@ with io.open("token", "r", encoding="utf-8") as f:
 # c_aux.checkFolders()
 
 # Init bot and cogs
-bot = commands.Bot(command_prefix=COMMAND_PREFIX)
+bot = Bot.getBot(COMMAND_PREFIX)
 
 # Bot events
 # When ready, load cogs
@@ -43,7 +45,7 @@ async def on_ready():
 	bot.remove_command("help")
 
 	aux.log("Loading Event Channel")
-	eventChannel = aux.getEventChannel(bot)
+	eventChannel = aux.getEventChannel()
 
 	aux.log("Loading cogs")
 	bot.add_cog(random_c.Random(bot, eventChannel))
@@ -51,8 +53,8 @@ async def on_ready():
 	bot.add_cog(basic_c.Basic(bot, eventChannel))
 	bot.add_cog(economy_c.Economy(bot, eventChannel))
 	bot.add_cog(waifu_c.Waifu(bot, eventChannel))
-	bot.add_cog(autism_c.Autism(bot, eventChannel))
-	bot.add_cog(admin_c.Admin(bot, eventChannel))
+	bot.add_cog(autism_c.Autism(eventChannel))
+	bot.add_cog(admin_c.Admin(eventChannel))
 	# bot.add_cog(wargame_c.Wargame(bot, eventChannel))
 	aux.log("All cogs loaded")
 
@@ -84,11 +86,14 @@ async def on_message(message):
 	# Log and process
 	# await log(message.author, message.content.strip("\n"))
 
-	# Self-invoked commands
-	await autism_c.on_message(bot, message)
+	# Self-invoked commands kills the command execution
+	selfInvokedCommand = False
+	if await autism_c.on_message(message) == 0:
+		selfInvokedCommand = True
 
 	# Commands
-	await bot.process_commands(message)
+	if not selfInvokedCommand:
+		await bot.process_commands(message)
 
 @bot.event
 async def on_guild_join(guild):

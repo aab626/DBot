@@ -1,18 +1,21 @@
 from scripts.events.Event import Event
 
-from scripts.economy_f import *
 from scripts.autism_f import *
+from scripts.autism_fAux import *
+
+
+from scripts.economy_f import *
 
 import discord
 
 class chocheEvent(Event):
-	def __init__(self, name, bot, channel,
+	def __init__(self, name, channel,
 				 minWait, maxWait, duration, 
 				 checkWait, eventWait, 
 				 activityTimeThreshold, activityWaitMin, activityWaitMax,
 				 minPrize, maxPrize):
 
-		super().__init__(name, bot, channel, 
+		super().__init__(name, channel, 
 						 minWait, maxWait, duration, 
 						 checkWait, eventWait, 
 						 activityTimeThreshold, activityWaitMin, activityWaitMax)
