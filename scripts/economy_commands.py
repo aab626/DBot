@@ -18,8 +18,8 @@ class Economy(commands.Cog):
 		self.claimEvent = claimEvent(name="claim", channel=self.eventChannel,
 									 minWait=int(2.5*3600), maxWait=5*3600, duration=90,
 									 checkWait=60, eventWait=0.1,
-									 activityTimeThreshold=30*60, activityWaitMin=int(1*3600), activityWaitMax=int(1.75*3600),
-									 prize=12, maxUsers=5)
+									 activityTimeThreshold=60*60, activityWaitMin=int(0.75*3600), activityWaitMax=int(1.5*3600),
+									 prize=15, maxUsers=5)
 
 		self.claimEvent.startLoop()
 

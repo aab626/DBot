@@ -29,10 +29,10 @@ class Waifu(commands.Cog):
 
 		# Add the events to the bot's event loop
 		self.waifuAuctionHouseEvent = waifuAuctionHouseEvent(name="waifuAH", channel=self.eventChannel,
-															 minWait=int(2*3600), maxWait=int(4.5*3600), duration=int(1.5*60),
+															 minWait=int(2*3600), maxWait=int(3.5*3600), duration=90,
 															 checkWait=60, eventWait=0.1,
-															 activityTimeThreshold=30*60, activityWaitMin=int(1*3600), activityWaitMax=int(1.75*3600),
-															 timeThresholdToExtend=10, bidTimeExtension=10)
+															 activityTimeThreshold=1*3600, activityWaitMin=int(0.5*3600), activityWaitMax=int(1.5*3600),
+															 timeThresholdToExtend=15, bidTimeExtension=15)
 
 		self.waifuAuctionHouseEvent.startLoop()
 

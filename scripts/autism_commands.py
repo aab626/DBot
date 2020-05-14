@@ -39,8 +39,8 @@ class Autism(commands.Cog):
 		self.chocheEvent = chocheEvent(name="choche", channel=self.eventChannel,
 									   minWait=1*3600, maxWait=3*3600, duration=60,
 									   checkWait=60, eventWait=0.1,
-									   activityTimeThreshold=30*60, activityWaitMin=int(0.5*1*3600), activityWaitMax=int(0.5*3*3600),
-									   minPrize=2, maxPrize=5)
+									   activityTimeThreshold=1*3600, activityWaitMin=int(0.5*3600), activityWaitMax=int(1*3600),
+									   minPrize=3, maxPrize=6)
 		self.chocheEvent.startLoop()
 
 	@commands.command()
