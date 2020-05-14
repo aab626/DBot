@@ -1,6 +1,7 @@
 from scripts.events.Event import Event
 
 from scripts.economy_f import *
+from scripts.models.economy import *
 
 import discord
 import random
@@ -36,7 +37,7 @@ class claimEvent(Event):
 		await self.channel.send("@here", embed=embed)
 
 	def endCondition(self):
-		return ((timeNow() > self.timeEnd) or (len(self.users) == self.maxUsers))
+		return ((utcNow() > self.timeEnd) or (len(self.users) == self.maxUsers))
 
 	def eventPrePublish(self):
 		valueDict = dict()
@@ -47,6 +48,7 @@ class claimEvent(Event):
 			i += 1
 
 		valueSum = sum(valueDict.values())
+		print(valueDict)
 		self.prizeDict = {user: int(round(self.prize*valueDict[user]/valueSum)) for user in self.users}
 
 	async def eventPublishEnd(self):
@@ -65,10 +67,11 @@ class claimEvent(Event):
 		await self.channel.send("", embed=embed)
 
 	def eventStop(self):
+		print(self.users)
 		if len(self.users) > 0:
 			for user in self.prizeDict.keys():
-				getEconomyProfile(user)
-				changeBalance(user, self.prizeDict[user])
+				print(type(user), user, self.prizeDict[user])
+				EcoProfile.load(user).changeBalance(self.prizeDict[user], forced=True)
 
 		self.status = False
 		self.setTimeStart(self.minWait, self.maxWait)

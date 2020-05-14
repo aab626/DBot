@@ -1,29 +1,31 @@
 from scripts.economy_f import *
 from scripts.helpers.aux_f import *
 from scripts.helpers.dbClient import *
-from scripts.helpers.eventManager import *
+from scripts.helpers.EventManager import *
+from scripts.helpers.Bot import *
+from scripts.models.economy import *
 
-async def shutdownDBot(ctx, bot):
+async def shutdown_f(ctx):
 	if not isAdmin(ctx.author):
-		await inssuficientPermissions(ctx)
 		return -1
 
 	await ctx.send("Oyasuminasai~")
 	dbClient.getClient().close()
-	await bot.close()
+	await Bot.getBot().close()
+	return 0
 
-def admin_addmoney(ctx, mentionedUser, changeAmount):
+def admin_addmoney(ctx, user, changeAmount):
 	if not isAdmin(ctx.author):
 		return -1
 	else:
-		changeBalance(mentionedUser, changeAmount)
+		EcoProfile.load(user).changeBalance(changeAmount, forced=True)
 		return 0
 
 def admin_event_list(ctx):
 	if not isAdmin(ctx.author):
 		return -1
 
-	evManager = eventManager.getEventManager()
+	evManager = EventManager.getEventManager()
 	eventList = evManager.getEventList()
 
 	if len(eventList) == 0:
@@ -37,7 +39,7 @@ def admin_event_info(ctx, eventName):
 	if not isAdmin(ctx.author):
 		return -1
 
-	evManager = eventManager.getEventManager()
+	evManager = EventManager.getEventManager()
 	event = evManager.getEvent(eventName)
 
 	if event == -1:
@@ -59,7 +61,7 @@ def admin_event_force(ctx, eventName, timeToExecution):
 	if not isAdmin(ctx.author):
 		return -1
 
-	evManager = eventManager.getEventManager()
+	evManager = EventManager.getEventManager()
 	event = evManager.getEvent(eventName)
 
 	if event == -1:

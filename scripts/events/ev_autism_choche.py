@@ -2,9 +2,9 @@ from scripts.events.Event import Event
 
 from scripts.autism_f import *
 from scripts.autism_fAux import *
-
-
 from scripts.economy_f import *
+
+from scripts.models.economy import *
 
 import discord
 
@@ -44,7 +44,7 @@ class chocheEvent(Event):
 		await self.channel.send("Hola yutuberos... @here", embed=embed)
 
 	def endCondition(self):
-		return ((timeNow() > self.timeEnd) or (self.winnerUser != None))
+		return ((utcNow() > self.timeEnd) or (self.winnerUser != None))
 
 	async def eventPublishEnd(self):
 		if self.winnerUser != None:
@@ -57,8 +57,7 @@ class chocheEvent(Event):
 
 	def eventStop(self):
 		if self.winnerUser != None:
-			getEconomyProfile(self.winnerUser)
-			changeBalance(self.winnerUser, self.prize)
+			EcoProfile.load(self.winnerUser).changeBalance(self.prize)
 
 		self.status = False
 		self.setTimeStart(self.minWait, self.maxWait)

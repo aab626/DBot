@@ -17,7 +17,7 @@ class EcoProfile:
 		self.user = user
 		self.balance = balance
 		self.timeCreation = timeCreation
-		self.timeCollection = timeCreation
+		self.timeCollection = timeCollection
 
 		self._lock = lock
 
@@ -28,13 +28,13 @@ class EcoProfile:
 	def load(user):
 		mongoClient = dbClient.getClient()
 		timeAware_Collection = mongoClient.DBot.economy.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
-		profileDoc = timeAware_Collection.find({"user.id": user.id})
+		profileDoc = timeAware_Collection.find_one({"user.id": user.id})
 
 		if profileDoc is None:
 			user = user
 			balance = STARTING_MONEY
-			timeCreation = timeNow()
-			timeCollection = timeNow()
+			timeCreation = utcNow()
+			timeCollection = utcNow()
 			lock = False
 		else:
 			user = Bot.getBot().get_user(profileDoc["user"]["id"])
@@ -43,7 +43,7 @@ class EcoProfile:
 			timeCollection = profileDoc["timeCollection"]
 			lock = profileDoc["lock"]
 
-		profile = EcoProfile(user, balance, timeCreation, timeCollection)
+		profile = EcoProfile(user, balance, timeCreation, timeCollection, lock)
 		if profileDoc is None:
 			profile._save()
 
@@ -52,24 +52,32 @@ class EcoProfile:
 	####################
 	# PUBLIC METHODS
 
-	def changeBalance(changeAmount):
-		if self.checkBalance(changeAmount):
+	def changeBalance(self, changeAmount, forced=False):
+		if forced or self.checkBalance(changeAmount):
+			self.lock()
 			self.balance += changeAmount
 			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"balance": self.balance}})
+			self.unlock()
 			return 0
 		else:
 			return -1
 
+	# amountToCheck > 0
+	# returns true if the balance is higher or equal than the amount
 	def checkBalance(self, amountToCheck):
-		if amountToCheck < 0:
+		amountToCheck = abs(amountToCheck)
+		if amountToCheck < 0 or self.balance >= amountToCheck:
 			return True
 		else:
-			return self.balance >= amountToCheck
+			return False
 
 	def collect(self):
 		if self._ableToCollect():
 			self.changeBalance(COLLECTION_MONEY)
-			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"timeCollection": timeNow()}})
+			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"timeCollection": utcNow()}})
+			
+			timeAware_Collection = mongoClient.DBot.economy.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
+			self.timeCollection = timeAware_Collection.find_one({"user.id": self.user.id})["timeCollection"]
 			return 0
 		else:
 			return -1
@@ -79,11 +87,11 @@ class EcoProfile:
 
 	def lock(self):
 		self._lock = True
-		dbClient.getClient().DBot.economy.update_one({"user.id": self,user.id}, {"$set": {"lock": self._lock}})
+		dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"lock": self._lock}})
 
 	def unlock(self):
 		self._lock = False
-		dbClient.getClient().DBot.economy.update_one({"user.id": self,user.id}, {"$set": {"lock": self._lock}})
+		dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"lock": self._lock}})
 
 	##################
 	# PRIVATE METHODS
@@ -106,10 +114,10 @@ class EcoProfile:
 			mongoClient.DBot.economy.replace_one({"user.id": self.user.id}, self._makeDoc())
 
 	def _ableToCollect(self):
-		dateCreated = datetime.date.fromtimestamp(timeCreation.timestamp())
-		dateCollected = datetime.date.fromtimestamp(timeCollection.timestamp())
+		dateCreated = timeToDate(self.timeCreation)
+		dateCollected = timeToDate(self.timeCollection)
 		date = dateNow()
-		if date == dateCreated or date == dateCollected:
-			return False
-		else:
+		if date > dateCollected and date > dateCreated:
 			return True
+		else:
+			return False

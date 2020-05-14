@@ -88,6 +88,7 @@ class Waifu(commands.Cog):
 	@waifu.command(aliases=["fav"])
 	async def favorite(self, ctx, favArg):
 		code = waifu_favorite_f(ctx.author, favArg)
+		print(code)
 		if code == -1:
 			await ctx.send("{}, you do not have this waifu in your waifu list.".format(ctx.author.mention))
 		elif code == -2:
@@ -104,7 +105,7 @@ class Waifu(commands.Cog):
 
 	@waifu.command(aliases=["fusion"])
 	async def fuse(self, ctx, waifuID1: int, waifuID2: int, waifuID3: int):
-		code = waifu_fuse_f(ctx.author, waifuID1, waifuID2, waifuDI3)
+		code = waifu_fuse_f(ctx.author, waifuID1, waifuID2, waifuID3)
 		if code == -1:
 			await ctx.send("{}, One of the Waifu IDs you entered is not in your list.".format(ctx.author.mention))
 		elif code == -2:

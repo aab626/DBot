@@ -1,7 +1,10 @@
 from scripts.helpers.dbClient import *
+from scripts.helpers.aux_f import *
 
-import datetime
+from scripts.waifu_fAux import *
+
 from bson.codec_options import CodecOptions
+import datetime
 import collections
 
 # class nya !!!
@@ -20,16 +23,16 @@ class WaifuProfile:
 	def load(user):
 		mongoClient = dbClient.getClient()
 		timeAware_Collection = mongoClient.DBot.waifu.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
-		profileDoc = timeAware_Collection.find({"user.id": user.id})
+		profileDoc = timeAware_Collection.find_one({"user.id": user.id})
 
 		if profileDoc is None:
 			user = user
 			waifuList = []
 			waifuFavorite = None
-			timeCreation = timeNow()
-			timeSummoning = timeNow() - datetime.timedelta(days=1)
+			timeCreation = utcNow()
+			timeSummoning = utcNow() - datetime.timedelta(days=1)
 		else:
-			user = Bot.getBot.get_user(profileDoc["user"]["id"])
+			user = Bot.getBot().get_user(profileDoc["user"]["id"])
 			waifuList = profileDoc["waifuList"]
 			waifuFavorite = profileDoc["waifuFavorite"]
 			timeCreation = profileDoc["timeCreation"]
@@ -47,12 +50,12 @@ class WaifuProfile:
 	def addWaifu(self, waifu):
 		waifuID = waifu["MAL_data"]["charID"]
 		self.waifuList.append(waifuID)
-		dbClient.getClient().waifu.update_one({"user.id": self.user.id}, {"$set": {"waifuList": self.waifuList}})
+		dbClient.getClient().DBot.waifu.update_one({"user.id": self.user.id}, {"$set": {"waifuList": self.waifuList}})
 
 	def removeWaifu(self, waifu):
 		waifuID = waifu["MAL_data"]["charID"]
 		self.waifuList.remove(waifuID)
-		dbClient.getClient().waifu.update_one({"user.id": self.user.id}, {"$set": {"waifuList": self.waifuList}})
+		dbClient.getClient().DBot.waifu.update_one({"user.id": self.user.id}, {"$set": {"waifuList": self.waifuList}})
 
 	def checkWaifu(self, waifu):
 		return waifu["MAL_data"]["charID"] in self.waifuList
@@ -66,6 +69,7 @@ class WaifuProfile:
 			return -1
 		else:
 			self.waifuFavorite = waifuID
+			dbClient.getClient().DBot.waifu.update_one({"user.id": self.user.id}, {"$set": {"waifuFavorite": self.waifuFavorite}})
 			return 0
 
 	def clearFavorite(self):
@@ -80,7 +84,10 @@ class WaifuProfile:
 		if self._ableToSummon():
 			waifu = getRandomWaifuByRank(getSummonRank())
 			self.addWaifu(waifu)
-			dbClient.getClient().DBot.waifu.update_one({"user.id": self.user.id}, {"$set": {"timeSummoning": timeNow()}})
+			dbClient.getClient().DBot.waifu.update_one({"user.id": self.user.id}, {"$set": {"timeSummoning": utcNow()}})
+
+			timeAware_Collection = dbClient.getClient().DBot.waifu.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
+			self.timeSummoning = timeAware_Collection.find_one({"user.id": self.user.id})["timeSummoning"]
 			return waifu
 		else:
 			return -1
@@ -105,9 +112,9 @@ class WaifuProfile:
 		mongoClient = dbClient.getClient()
 		profileDoc = self._makeDoc()
 		if mongoClient.DBot.waifu.count_documents({"user.id": self.user.id}) == 0:
-			mongoClient.DBot.economy.insert_one(profileDoc)
+			mongoClient.DBot.waifu.insert_one(profileDoc)
 		else:
-			mongoClient.DBot.economy.reaplace_one({"user.id": self.user.id}, profileDoc)
+			mongoClient.DBot.waifu.reaplace_one({"user.id": self.user.id}, profileDoc)
 
 	def _ableToSummon(self):
 		return dateNow() > timeToDate(self.timeSummoning)

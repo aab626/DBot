@@ -1,5 +1,5 @@
 from scripts.helpers.aux_f import *
-from scripts.helpers.eventManager import *
+from scripts.helpers.EventManager import *
 from scripts.helpers.Bot import *
 
 import random
@@ -28,12 +28,12 @@ class Event:
 		self.activityWaitMin = activityWaitMin
 		self.activityWaitMax = activityWaitMax
 
-		self.timeStart = timeNow()
-		self.timeEnd = timeNow()
+		self.timeStart = utcNow()
+		self.timeEnd = utcNow()
 
 		self.eventLog("Instantiated")
 
-		evManager = eventManager.getEventManager()
+		evManager = EventManager.getEventManager()
 		evManager.registerEvent(self)
 		self.eventLog("Registered in EventManager")
 
@@ -49,7 +49,7 @@ class Event:
 		# Pre-loop event init
 		self.eventLog("LOAD Phase")
 		self.eventLoad()
-		self.eventLog("Start Time: {}".format(self.timeStart))
+		self.eventLog("Start Time: {} [{}]".format(self.timeStart, self.timeStart.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S")))
 		# Wait-for-event loop
 		while True:
 			# If there is a condition valid for start, check activity
@@ -66,7 +66,7 @@ class Event:
 				# Pre-event initialization and publish
 				self.eventLog("INIT Phase")
 				self.eventInit()
-				self.eventLog("End Time: {}".format(self.timeEnd))
+				self.eventLog("End Time: {} [{}]".format(self.timeEnd, self.timeEnd.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S")))
 
 				self.eventLog("Publishing START")
 				await self.eventPublishStart()
@@ -74,8 +74,6 @@ class Event:
 				# Main Event loop
 				self.eventLog("Entering Main event-loop")
 				while not self.endCondition():
-					# print(timeNow().strftime("[%H:%M:%S]"), "looping")#DEBUG
-
 					# Event process during main event loop
 					await self.eventProcess()
 
@@ -91,7 +89,7 @@ class Event:
 
 				self.eventLog("STOP Phase")
 				self.eventStop()
-				self.eventLog("Start Time: {}".format(self.timeStart))
+				self.eventLog("Start Time: {} [{}]".format(self.timeStart, self.timeStart.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S")))
 
 			else:
 				self.eventLog("startCondition FAILED")
@@ -115,7 +113,7 @@ class Event:
 	#	true : start event
 	#	false: dont start event, delay until checkWait seconds
 	def startCondition(self):
-		return timeNow() > self.timeStart
+		return utcNow() > self.timeStart
 
 	# Sets the activity needed as a condition for the event to start
 	# Defaults to check:
@@ -143,7 +141,7 @@ class Event:
 	#	true : stop the event
 	#	false: continue the event
 	def endCondition(self):
-		return timeNow() > self.timeEnd
+		return utcNow() > self.timeEnd
 
 	# Main process method when the event is running
 	# Can be overriden.
@@ -182,7 +180,7 @@ class Event:
 			waitTime = 0
 			print("ERROR: call to setTimeStart with no arguments")
 
-		self.timeStart = timeNow() + datetime.timedelta(seconds=waitTime)
+		self.timeStart = utcNow() + datetime.timedelta(seconds=waitTime)
 
 	# Helper functions to update the end time of the event
 	# Should not be overriden.
@@ -195,7 +193,7 @@ class Event:
 			duration = 0
 			print("ERROR: call to setTimeEnd with no arguments.")
 
-		self.timeEnd = timeNow() + datetime.timedelta(seconds=duration)
+		self.timeEnd = utcNow() + datetime.timedelta(seconds=duration)
 
 	# Getter for self.status
 	# Returns true if the event is running, false otherwise

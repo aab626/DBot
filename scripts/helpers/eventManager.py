@@ -2,18 +2,18 @@ class EventManager:
 	__instance = None
 
 	def __init__(self):
-		if eventManager.__instance == None:
-			eventManager.__instance = self
+		if EventManager.__instance == None:
+			EventManager.__instance = self
 		else:
-			raise Exception("eventManager is meant to be a singleton.")
+			raise Exception("EventManager is meant to be a singleton.")
 
 		self._eventDict = dict()
 
 	@staticmethod
 	def getEventManager():
-		if eventManager.__instance == None:
-			eventManager()
-		return eventManager.__instance
+		if EventManager.__instance == None:
+			EventManager()
+		return EventManager.__instance
 
 	def registerEvent(self, event):
 		if not (event.name in self._eventDict):

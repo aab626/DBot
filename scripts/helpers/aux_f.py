@@ -33,10 +33,13 @@ async def eventNotRunning(ctx):
 def timeNow():
 	return datetime.datetime.now(tz=TIMEZONE)
 
+def utcNow():
+	return datetime.datetime.now(datetime.timezone.utc)
+
 def dateNow():
 	return timeToDate(timeNow())
 
-def timeToDate(time)
+def timeToDate(time):
 	return datetime.date.fromisoformat(time.strftime("%Y-%m-%d"))
 
 def log(toLog):

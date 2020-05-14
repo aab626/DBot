@@ -1,7 +1,10 @@
 from scripts.events.Event import Event
 
-from scripts.economy_f import *
-from scripts.waifu_f import *
+from scripts.models.economy import *
+from scripts.models.waifu import *
+
+from scripts.waifu_fAux import *
+from scripts.economy_fAux import *
 
 import discord
 import random
@@ -46,7 +49,7 @@ class waifuAuctionHouseEvent(Event):
 
 		self.user = None
 		self.lastBid = self.startingBid
-		self.lastBidTime = timeNow()
+		self.lastBidTime = utcNow()
 		self.lastBidTimeChecked = self.lastBidTime
 
 	async def eventPublishStart(self):
@@ -74,11 +77,11 @@ class waifuAuctionHouseEvent(Event):
 		await self.channel.send("@here", embed=embed)
 
 	def endCondition(self):
-		return ((timeNow() > self.timeEnd) or (self.lastBid >= self.buyoutPrize))
+		return ((utcNow() > self.timeEnd) or (self.lastBid >= self.buyoutPrize))
 
 	async def eventProcess(self):
 		if self.lastBidTime != self.lastBidTimeChecked:
-			if (self.timeEnd - timeNow()).total_seconds() < self.timeThresholdToExtend:
+			if (self.timeEnd - utcNow()).total_seconds() < self.timeThresholdToExtend:
 				self.setTimeEnd(self.bidTimeExtension)
 				self.lastBidTimeChecked = self.lastBidTime
 
@@ -102,8 +105,8 @@ class waifuAuctionHouseEvent(Event):
 
 	def eventStop(self):
 		if self.user != None:
-			changeBalance(self.user, -self.lastBid)
-			addWaifu(self.user, self.waifu)
+			EcoProfile.load(self.user).changeBalance(-self.lastBid)
+			WaifuProfile.load(self.user).addWaifu(self.waifu)
 
 		self.status = False
 		self.setTimeStart(self.minWait, self.maxWait)

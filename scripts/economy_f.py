@@ -3,33 +3,17 @@ from scripts.economy_fAux import *
 
 from scripts.helpers.aux_f import *
 from scripts.helpers.dbClient import *
-from scripts.helpers.eventManager import *
+from scripts.helpers.EventManager import *
+from scripts.helpers.Bot import *
 
 import datetime
 import random
 import pymongo
 
-############
-# CONSTANTS
-
-STARTING_BALANCE = 15
-
-CURRENCY_SYMBOL = "D\U000000A2"
-CURRENCY_NAME_SINGULAR = "DCoin"
-CURRENCY_NAME_PLURAL = "DCoins"
-
-LOTTERY_NUMBERS_IN_POOL = 17
-LOTTERY_NUMBERS_TO_DRAW = 10
-LOTTERY_PRIZE_DICTIONARY = {10: 100, 9: 50, 8: 15, 7: 10}
-LOTTERY_MAX_GAMES_ALLOWED = 15
-LOTTERY_COST = 5
-
-COLLECT_AMOUNT = 5
-
 ###########
 # FUNCTIONS
 
-def balance_f(ctx, targetUser):
+def balance_f(ctx, userMentioned):
 	if userMentioned != None:
 		if isAdmin(ctx.author):
 			targetUser = userMentioned
@@ -81,14 +65,12 @@ def lottery_f(user, gamesToPlay):
 
 	embed = discord.Embed(title="Lottery", description="Winning ticket: `[{}]`".format("-".join([str(t).zfill(2) for t in lotteryReport["winningTicket"]])))
 	embed.add_field(name="Tickets", value="\n".join(ticketStrings), inline=False)
-	embed.add_field(name="Results", value="Total Prize: {}\n".format(totalPrize)+resultStr, inline=False)
+	embed.add_field(name="Results", value="Total Prize: {}\n{}".format(totalPrize, resultStr), inline=False)
 	if totalChange == 0:
 		embed.set_footer(text="Booooooooooring")
 
 	# Make balance changes and unlock profile
-	profile.changeBalance(-totalCost)
-	if totalPrize > 0:
-		profile.changeBalance(totalPrize)
+	profile.changeBalance(totalPrize-totalCost)
 	profile.unlock()
 
 	return embed
@@ -100,12 +82,12 @@ def collect_f(user):
 		return -1
 	elif code == 0:
 		embedTitle = "Welfare Collected!"
-		embedDescription = "You just collected your daily {}".format(pmoney(COLLECTION_MONEY))
+		embedDescription = "You just collected your daily {}".format(pMoney(EcoProfile.COLLECTION_MONEY))
 		embed = discord.Embed(title=embedTitle, description=embedDescription)
 		return embed
 
 def claim_f(user):
-	evManager = eventManager.getEventManager()
+	evManager = EventManager.getEventManager()
 	claimEvent = evManager.getEvent("claim")
 
 	if not claimEvent.isRunning():
@@ -131,13 +113,8 @@ def pay_f(originUser, destinationUser, amount):
 	if not originProfile.checkBalance(amount):
 		return -4
 
-	originProfile.lock()
 	originProfile.changeBalance(-amount)
-	originProfile.unlock()
-
-	destinationProfile.lock()
 	destinationProfile.changeBalance(amount)
-	destinationProfile.unlock()
 
 	embedTitle = "Successful transaction"
 	embedDescription = "{} just sent {} to {}.".format(originUser.name, pMoney(amount), destinationUser.name)
@@ -152,9 +129,9 @@ def ranking_f():
 
 	selectedDocs = ecoDocs[:5]
 	for ecoDoc in selectedDocs:
-		profile = EcoProfile.load(ecoDoc["user"]["id"])
+		profile = EcoProfile.load(Bot.getBot().get_user(ecoDoc["user"]["id"]))
 		fieldName = "{}/{}: {}".format(selectedDocs.index(ecoDoc)+1, len(selectedDocs), profile.user.name)
 		fieldValue = "Balance: {}".format(pMoney(profile.balance))
-		embed.add_field(name=fieldName, value=fieldValue)
+		embed.add_field(name=fieldName, value=fieldValue, inline=False)
 	
 	return embed

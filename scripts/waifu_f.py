@@ -5,11 +5,13 @@ from scripts.models.waifu import *
 from scripts.models.economy import *
 
 from scripts.waifu_fAux import *
+from scripts.economy_fAux import *
 
 import pymongo
 import random
 import datetime
 import collections
+import math
 
 ###########
 # FUNCTIONS
@@ -27,7 +29,7 @@ def waifu_list_f(ctx, args):
 	ranksQuery = ranksInArgs if len(ranksInArgs) > 0 else WAIFU_RANKS
 
 	# parse target user
-	mentions = ctx.mentions
+	mentions = ctx.message.mentions
 	if len(mentions) != 0:
 		if not isAdmin(ctx.author):
 			return -2
@@ -36,7 +38,7 @@ def waifu_list_f(ctx, args):
 
 		targetUser = mentions[0]
 	else:
-		targetUser = mentions[0]
+		targetUser = ctx.author
 
 	# Parse duplicate mode
 	duplicateMode = False
@@ -53,9 +55,11 @@ def waifu_list_f(ctx, args):
 			return -5
 
 	# Query waifus from DB
-	query = {"$and": [{"rank": {"$in": ranksQuery}}, {"MAL_data.charID": {"$in": waifuProfile["waifuList"]}}]}
-	mongoClient = dbClient.getClient()
-	waifuList = list(mongoClient.DBot.waifus.find(query).sort("value", pymongo.DESCENDING))
+	waifuList = []
+	for waifuID in waifuProfile.waifuList:
+		waifu = dbClient.getClient().DBot.waifus.find_one({"MAL_data.charID": waifuID})
+		waifuList.append(waifu)
+	waifuList.sort(key=lambda waifu: waifu["value"], reverse=True)
 
 	if duplicateMode:
 		duplicateDict = waifuProfile.getDuplicateWaifuIDs()
@@ -86,7 +90,7 @@ def waifu_list_f(ctx, args):
 			waifu["name"])
 
 		fieldValue1 = "Source: {}".format(waifu["animeName"])
-		fieldValue2 = "Ranking: {}/{}\nValue:{}".format(waifu["ranking"], waifuCount(), waifu["value"])
+		fieldValue2 = "Ranking: {}/{}\nValue: {}".format(waifu["ranking"], waifuCount(), waifu["value"])
 		fieldValue3 = "Waifu ID: {}".format(waifu["MAL_data"]["charID"])
 		fieldValues = [fieldValue1, fieldValue2, fieldValue3]
 
@@ -134,12 +138,12 @@ def waifu_bid_f(user, bidAmount):
 	ecoProfile.lock()
 
 	# Set this user as current bidder in event
-	waifuAHEvent.user = author
+	waifuAHEvent.user = user
 	waifuAHEvent.lastBid = bidAmount
 	waifuAHEvent.lastBidTime = t
 
 	# Assemble embed and return
-	embed = discord.Embed(title="Bid Registered", description="{} made the latest bid!".format(ctx.message.author.name))
+	embed = discord.Embed(title="Bid Registered", description="{} made the latest bid!".format(user.name))
 	embed.add_field(name="Bid Amount", value="{}".format(pMoney(bidAmount)))
 
 	if extendedTime:
@@ -160,6 +164,7 @@ def waifu_favorite_f(user, favArg):
 	if favArg.isdigit():
 		newFavWaifuID = int(favArg)
 		code = waifuProfile.setFavorite(newFavWaifuID)
+		return code
 
 def waifu_ranking_f(user, rankArg):
 	if rankArg == "me":
@@ -168,6 +173,7 @@ def waifu_ranking_f(user, rankArg):
 		embed = discord.Embed(title="Waifu Ranking", description="You are in position {}/{}.".format(rankingPos, rankingLength))
 	else:
 		embed = discord.Embed(title="Waifu Ranking", description="Top 5 based on Total Waifu Value.")
+		i = 1
 		for waifuProfile in getWaifuRankingList()[:5]:
 			fieldName = "{}/5: {}".format(i, waifuProfile.user.name)
 			fieldValue = "Total Value: {}, with {} waifus".format(waifuProfile.getTotalValue(), len(waifuProfile.waifuList))
@@ -238,13 +244,13 @@ def waifu_fuse_f(user, waifuID1, waifuID2, waifuID3):
 
 def waifu_summon_f(user):
 	waifuProfile = WaifuProfile.load(user)
-	code = waifuProfile.summon()
+	code = waifuProfile.summonWaifu()
 
 	if code == -1:
 		return -1
 
 	waifu = code
-	embedTitle = "\U00002728 {}'s Waifu Summon \U00002728".format(ctx.message.author)
+	embedTitle = "\U00002728 {}'s Waifu Summon \U00002728".format(user)
 	embedDescription = "You summoned a {}-tier Waifu!".format(waifu["rank"])
 	embed = discord.Embed(title=embedTitle, description=embedDescription)
 

@@ -4,7 +4,7 @@ from scripts.autism_fAux import *
 
 from scripts.helpers.aux_f import *
 from scripts.helpers.dbClient import *
-from scripts.helpers.eventManager import *
+from scripts.helpers.EventManager import *
 from scripts.helpers.Bot import *
 
 from PIL import Image, GifImagePlugin
@@ -84,7 +84,7 @@ def isak_add_f(author, phrase):
 		return 0
 
 def choche_f(ctx):
-	evManager = eventManager.getEventManager()
+	evManager = EventManager.getEventManager()
 	chocheEvent = evManager.getEvent("choche")
 
 	if not chocheEvent.isRunning():

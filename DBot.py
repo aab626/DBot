@@ -23,7 +23,6 @@ import scripts.economy_commands as economy_c
 import scripts.waifu_commands as waifu_c
 import scripts.admin_commands as admin_c
 import scripts.autism_commands as autism_c
-import scripts.autism_commands_bot as autism_cb
 # import scripts.wargame_commands as wargame_c
 
 # Set prefix and load token

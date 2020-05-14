@@ -6,6 +6,8 @@ WAIFU_RANKS = ["E", "D", "C", "B", "A", "S","SS", "SSS"]
 NO_FAV_WAIFU_URL = "https://raw.githubusercontent.com/drizak/DBot/master/resources/noFavWaifu.png"
 WAIFU_LIST_WAIFUS_PER_PAGE = 5
 
+import random
+
 # returns a waifu based on MAL character id
 def getWaifu(MAL_charID):
 	waifu = dbClient.getClient().DBot.waifus.find_one({"MAL_data.charID": MAL_charID})
@@ -38,7 +40,7 @@ def getWaifuRankingList():
 					]
 
 	waifuDocList = list(dbClient.getClient().DBot.waifu.aggregate(aggregateQuery))
-	waifuProfiles = [WaifuProfile.load(Bot.get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocList]
+	waifuProfiles = [WaifuProfile.load(Bot.getBot().get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocList]
 	return list(waifuProfiles)
 
 # Returns the position in the ranking of an user (indexing from 1)

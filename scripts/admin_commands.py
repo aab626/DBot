@@ -5,10 +5,6 @@ from discord.ext import commands
 from scripts.admin_f import *
 from scripts.helpers.aux_f import *
 from scripts.helpers.dbClient import *
-from scripts.helpers.eventManager import *
-
-import datetime
-import pprint
 
 ####################################################
 # ADMIN COG
@@ -23,7 +19,9 @@ class Admin(commands.Cog):
 
 	@admin.command(aliases=["oyasumi", "oyasuminasai"])
 	async def shutdown(self, ctx):
-		await shutdownDBot(ctx, self.bot)
+		code = await shutdown_f(ctx)
+		if code == -1:
+			await inssuficientPermissions(ctx)			
 		return 0
 
 	@admin.command()

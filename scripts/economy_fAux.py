@@ -1,5 +1,20 @@
 from scripts.helpers.dbClient import *
 
+import random
+
+#############
+# CONSTANTS
+
+CURRENCY_SYMBOL = "D\U000000A2"
+CURRENCY_NAME_SINGULAR = "DCoin"
+CURRENCY_NAME_PLURAL = "DCoins"
+
+LOTTERY_NUMBERS_IN_POOL = 17
+LOTTERY_NUMBERS_TO_DRAW = 10
+LOTTERY_PRIZE_DICTIONARY = {10: 100, 9: 50, 8: 15, 7: 10}
+LOTTERY_MAX_GAMES_ALLOWED = 15
+LOTTERY_COST = 5
+
 ####################################
 # GENERAL ECONOMY FUNCTIONS
 
@@ -40,7 +55,7 @@ def gameLottery(gamesToPlay):
 	winningTicket = generateTicket()
 
 	lotteryReport = {"winningTicket": winningTicket, "games": []}
-	while len(lotteryReport["games"] < gamesToPlay):
+	while len(lotteryReport["games"]) < gamesToPlay:
 		ticket = generateTicket()
 		if ticket in lotteryReport["games"]:
 			continue

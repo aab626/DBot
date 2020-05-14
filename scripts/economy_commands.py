@@ -16,7 +16,7 @@ class Economy(commands.Cog):
 
 		# Add the events to the bot's event loop
 		self.claimEvent = claimEvent(name="claim", channel=self.eventChannel,
-									 minWait=int(2.5*3600), maxWait=5*3600, duration=120,
+									 minWait=int(2.5*3600), maxWait=5*3600, duration=90,
 									 checkWait=60, eventWait=0.1,
 									 activityTimeThreshold=30*60, activityWaitMin=int(1*3600), activityWaitMax=int(1.75*3600),
 									 prize=12, maxUsers=5)
@@ -59,7 +59,7 @@ class Economy(commands.Cog):
 	async def collect(self, ctx):
 		code = collect_f(ctx.author)
 		if code == -1:
-			await ctx.send("{}, you can collect only once every day.")
+			await ctx.send("{}, you can collect only once every day.".format(ctx.author.mention))
 		else:
 			embed = code
 			await ctx.send("", embed=embed)
