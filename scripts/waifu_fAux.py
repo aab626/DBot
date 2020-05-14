@@ -19,29 +19,13 @@ def waifuCount():
 
 # Returns a list with the ranking list sorted by descending total waifu value
 def getWaifuRankingList():
-	aggregateQuery = [
-					    {
-					        '$match': {}
-					    }, {
-					        '$addFields': {
-					            'waifuCount': {
-					                '$size': '$waifuList'
-					            }
-					        }
-					    }, {
-					        '$sort': {
-					            'waifuCount': -1
-					        }
-					    }, {
-					        '$sort': {
-					            'totalWaifuValue': -1
-					        }
-					    }
-					]
-
-	waifuDocList = list(dbClient.getClient().DBot.waifu.aggregate(aggregateQuery))
-	waifuProfiles = [WaifuProfile.load(Bot.getBot().get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocList]
-	return list(waifuProfiles)
+	waifuDocs = list(dbClient.getClient().DBot.waifu.find({}))
+	waifuProfiles = [WaifuProfile.load(Bot.getBot().get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocs]
+	waifuDictRankedList = [{"profile": waifuProfile, "totalValue": waifuProfile.getTotalValue()} for waifuProfile in waifuProfiles]
+	waifuDictRankedList = waifuDictRankedList.sort(key=lambda waifuDict: len(waifuDict["profile"].waifuList))
+	waifuDictRankedList = waifuDictRankedList.sort(key=lambda waifuDict: waifuDict["totalValue"], reverse=True)
+	waifuRankedList = [waifuDict["profile"] for waifuDict in waifuDictRankedList]
+	return waifuRankedList
 
 # Returns the position in the ranking of an user (indexing from 1)
 def getWaifuRankingPosition(user):
