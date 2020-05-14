@@ -249,7 +249,9 @@ def waifu_summon_f(user):
 	if code == -1:
 		return -1
 
-	waifu = code
+	waifu = getRandomWaifuByRank(getSummonRank())
+	waifuProfile.addWaifu(waifu)
+
 	embedTitle = "\U00002728 {}'s Waifu Summon \U00002728".format(user)
 	embedDescription = "You summoned a {}-tier Waifu!".format(waifu["rank"])
 	embed = discord.Embed(title=embedTitle, description=embedDescription)

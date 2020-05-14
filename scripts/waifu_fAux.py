@@ -2,11 +2,11 @@ from scripts.helpers.dbClient import *
 from scripts.helpers.Bot import *
 from scripts.models.waifu import *
 
+import random
+
 WAIFU_RANKS = ["E", "D", "C", "B", "A", "S","SS", "SSS"]
 NO_FAV_WAIFU_URL = "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu.png"
 WAIFU_LIST_WAIFUS_PER_PAGE = 5
-
-import random
 
 # returns a waifu based on MAL character id
 def getWaifu(MAL_charID):
@@ -23,8 +23,8 @@ def getWaifuRankingList():
 	waifuProfiles = [WaifuProfile.load(Bot.getBot().get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocs]
 
 	waifuDictRankedList = [{"profile": waifuProfile, "totalValue": waifuProfile.getTotalValue()} for waifuProfile in waifuProfiles]
-	waifuDictRankedList = waifuDictRankedList.sort(key=lambda waifuDict: len(waifuDict["profile"].waifuList))
-	waifuDictRankedList = waifuDictRankedList.sort(key=lambda waifuDict: waifuDict["totalValue"], reverse=True)
+	waifuDictRankedList.sort(key=lambda waifuDict: len(waifuDict["profile"].waifuList))
+	waifuDictRankedList.sort(key=lambda waifuDict: waifuDict["totalValue"], reverse=True)
 	
 	waifuRankedList = [waifuDict["profile"] for waifuDict in waifuDictRankedList]
 	return waifuRankedList

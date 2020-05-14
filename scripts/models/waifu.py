@@ -1,7 +1,7 @@
 from scripts.helpers.dbClient import *
 from scripts.helpers.aux_f import *
 
-from scripts.waifu_fAux import *
+# from scripts.waifu_fAux import *
 
 from bson.codec_options import CodecOptions
 import datetime
@@ -82,18 +82,12 @@ class WaifuProfile:
 
 	def summonWaifu(self):
 		if self._ableToSummon():
-			waifu = getRandomWaifuByRank(getSummonRank())
-			self.addWaifu(waifu)
 			dbClient.getClient().DBot.waifu.update_one({"user.id": self.user.id}, {"$set": {"timeSummoning": utcNow()}})
-
 			timeAware_Collection = dbClient.getClient().DBot.waifu.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
 			self.timeSummoning = timeAware_Collection.find_one({"user.id": self.user.id})["timeSummoning"]
-			return waifu
+			return 0
 		else:
 			return -1
-
-
-
 
 	#################
 	# PRIVATE METHODS
