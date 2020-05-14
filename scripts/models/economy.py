@@ -76,7 +76,7 @@ class EcoProfile:
 			self.changeBalance(COLLECTION_MONEY)
 			dbClient.getClient().DBot.economy.update_one({"user.id": self.user.id}, {"$set": {"timeCollection": utcNow()}})
 			
-			timeAware_Collection = mongoClient.DBot.economy.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
+			timeAware_Collection = dbClient.getClient().DBot.economy.with_options(codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
 			self.timeCollection = timeAware_Collection.find_one({"user.id": self.user.id})["timeCollection"]
 			return 0
 		else:
