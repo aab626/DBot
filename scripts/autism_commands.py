@@ -47,7 +47,7 @@ class Autism(commands.Cog):
 	async def doviarab(self, ctx):
 		await ctx.send("22")
 
-	@commmands.command()
+	@commands.command()
 	async def doviafact(self, ctx):
 		embed = doviafact_f()
 		await ctx.send("", embed=embed)

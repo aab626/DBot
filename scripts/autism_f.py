@@ -64,6 +64,7 @@ def doviafact_f():
 	# Assemble embed
 	embedTitle = "A wonderful Doviafact you didn't know \U0001F4D2"
 	embedDescription = doviafact["fact"]
+	embed = discord.Embed(title=embedTitle, description=embedDescription)
 	embed.set_thumbnail(url="https://raw.githubusercontent.com/drizak/DBot/master/static/doviafact_redditor.png")
 	return embed
 
