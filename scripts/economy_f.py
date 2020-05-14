@@ -82,7 +82,7 @@ def collect_f(user):
 		return -1
 	elif code == 0:
 		embedTitle = "Welfare Collected!"
-		embedDescription = "You just collected your daily {}".format(pMoney(EcoProfile.COLLECTION_MONEY))
+		embedDescription = "You just collected your daily {}".format(pMoney(COLLECTION_MONEY))
 		embed = discord.Embed(title=embedTitle, description=embedDescription)
 		return embed
 
