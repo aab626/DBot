@@ -19,6 +19,7 @@ def waifuCount():
 
 # Returns a list with the ranking list sorted by descending total waifu value
 def getWaifuRankingList():
+	from scripts.models.waifu import WaifuProfile
 	waifuDocs = list(dbClient.getClient().DBot.waifu.find({}))
 	# waifuProfiles = [WaifuProfile.load(Bot.getBot().get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocs]
 	waifuProfiles = []
