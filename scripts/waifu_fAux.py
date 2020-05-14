@@ -3,7 +3,7 @@ from scripts.helpers.Bot import *
 from scripts.models.waifu import *
 
 WAIFU_RANKS = ["E", "D", "C", "B", "A", "S","SS", "SSS"]
-NO_FAV_WAIFU_URL = "https://raw.githubusercontent.com/drizak/DBot/master/resources/noFavWaifu.png"
+NO_FAV_WAIFU_URL = "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu.png"
 WAIFU_LIST_WAIFUS_PER_PAGE = 5
 
 import random

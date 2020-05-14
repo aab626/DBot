@@ -47,11 +47,15 @@ class Autism(commands.Cog):
 	async def doviarab(self, ctx):
 		await ctx.send("22")
 
+	@commmands.command()
+	async def doviafact(self, ctx):
+		embed = doviafact_f()
+		await ctx.send("", embed=embed)
+
 	@commands.group()
 	async def isak(self, ctx):
 		if ctx.invoked_subcommand is None:
 			await ctx.send(isak_f(ctx))
-		return 0
 
 	@isak.command(aliases=["add"])
 	async def isak_add(self, ctx, *, phraseToAdd: str):
@@ -60,7 +64,6 @@ class Autism(commands.Cog):
 			await ctx.send("{}, this phrase has already been added to isak.".format(ctx.author.mention))
 		elif code == 0:
 			await ctx.send("{}, the phrase has been added to isak, and is not awaiting moderation.".format(ctx.author.mention))
-		return 0
 
 	@commands.group()
 	async def choche(self, ctx):
@@ -95,4 +98,3 @@ class Autism(commands.Cog):
 		else:
 			file = code
 			await ctx.send("", file=file)
-		return 0

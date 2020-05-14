@@ -49,6 +49,24 @@ def callate_f(message):
 	else:
 		return -1
 
+def doviafact_f():
+	# Random chance for doviafact type
+	r = random.random()
+	if 0 < r <= 0.3:
+		doviafact_type = "communism"
+	else:
+		doviafact_type = "country"
+
+	# Get doviafact
+	i = random.randint(0, dbClient.getClient().DBot.doviafacts.count_documents({"type": doviafact_type}))
+	doviafact = dbClient.getClient().DBot.doviafacts.find({"type": doviafact_type})[i]
+
+	# Assemble embed
+	embedTitle = "A wonderful Doviafact you didn't know \U0001F4D2"
+	embedDescription = doviafact["fact"]
+	embed.set_thumbnail(url="https://raw.githubusercontent.com/drizak/DBot/master/static/doviafact_redditor.png")
+	return embed
+
 def isak_f(ctx):
 	phase1List = ["Pucha no puedo", 
 				  "Justo ahora estoy ocupado", 
