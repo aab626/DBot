@@ -3,6 +3,7 @@ import math
 import random
 
 import discord
+import pymongo
 
 import scripts.economy_fAux as economy_fAux
 import scripts.waifu_fAux as waifu_fAux
@@ -53,11 +54,12 @@ def waifu_list_f(ctx, args):
 			return -5
 
 	# Query waifus from DB
-	waifuList = []
-	for waifuID in waifuProfile.waifuList:
-		waifu = dbClient.getClient().DBot.waifus.find_one({"MAL_data.charID": waifuID})
-		waifuList.append(waifu)
-	waifuList.sort(key=lambda waifu: waifu["value"], reverse=True)
+	query = {"$and": [{"MAL_data.charID": {"$in": waifuProfile.waifuList}}, {"rank": {"$in": ranksQuery}}]}
+	waifuList = list(dbClient.getClient().DBot.waifus.find(query).sort("value", pymongo.DESCENDING))
+	# for waifuID in waifuProfile.waifuList:
+	# 	waifu = dbClient.getClient().DBot.waifus.find_one({"MAL_data.charID": waifuID})
+	# 	waifuList.append(waifu)
+	# waifuList.sort(key=lambda waifu: waifu["value"], reverse=True)
 
 	if duplicateMode:
 		duplicateDict = waifuProfile.getDuplicateWaifuIDs()

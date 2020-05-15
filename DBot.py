@@ -93,7 +93,7 @@ async def on_message(message):
     # Commands
     # Log and then process
     if not selfInvokedCommand:
-        await log(message)
+        log(message)
         await bot.process_commands(message)
 
 
