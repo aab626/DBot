@@ -3,7 +3,7 @@ import random
 import discord
 
 from scripts.events.Event import Event
-from scripts.helpers.aux_f import utcNow, TIMEZONE
+from scripts.helpers.aux_f import utcNow, TIMEZONE, utcToTZ
 from scripts.models.userprofile import UserProfile
 import scripts.commands.waifu.waifu_fAux as waifu_fAux
 import scripts.commands.economy.economy_fAux as economy_fAux
@@ -69,7 +69,7 @@ class waifuAuctionHouseEvent(Event):
 		auctionStr1 = "Value: {}".format(self.waifu["value"])
 		auctionStr2 = "Min. Bid: {}".format(self.startingBid+1)
 		auctionStr3 = "Buyout Prize: {}".format(self.buyoutPrize)
-		auctionStr4 = "Auction End: {}".format(self.timeEnd.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S"))
+		auctionStr4 = "Auction End: {}".format(utcToTZ(self.timeEnd).strftime("%H:%M:%S"))
 		auctionLines = [auctionStr1, auctionStr2, auctionStr3, auctionStr4]
 		embed.add_field(name="Auction", value="\n".join(auctionLines), inline=False)
 

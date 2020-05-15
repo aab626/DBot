@@ -2,7 +2,7 @@ import asyncio
 import datetime
 import random
 
-from scripts.helpers.aux_f import TIMEZONE, activityIn, log, utcNow
+from scripts.helpers.aux_f import TIMEZONE, activityIn, log, utcNow, utcToTZ
 from scripts.helpers.singletons import Bot, EventManager
 
 
@@ -50,7 +50,6 @@ class Event:
 		# Pre-loop event init
 		self.eventLog("LOAD Phase")
 		self.eventLoad()
-		self.eventLog("Start Time: {} [{}]".format(self.timeStart, self.timeStart.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S")))
 		# Wait-for-event loop
 		while True:
 			# If there is a condition valid for start, check activity
@@ -67,7 +66,6 @@ class Event:
 				# Pre-event initialization and publish
 				self.eventLog("INIT Phase")
 				self.eventInit()
-				self.eventLog("End Time: {} [{}]".format(self.timeEnd, self.timeEnd.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S")))
 
 				self.eventLog("Publishing START")
 				await self.eventPublishStart()
@@ -90,7 +88,6 @@ class Event:
 
 				self.eventLog("STOP Phase")
 				self.eventStop()
-				self.eventLog("Start Time: {} [{}]".format(self.timeStart, self.timeStart.replace(tzinfo=TIMEZONE).strftime("%H:%M:%S")))
 
 			else:
 				self.eventLog("startCondition FAILED")
@@ -182,6 +179,7 @@ class Event:
 			print("ERROR: call to setTimeStart with no arguments")
 
 		self.timeStart = utcNow() + datetime.timedelta(seconds=waitTime)
+		self.eventLog("Start Time: {} [{}]".format(self.timeStart, utcToTZ(self.timeStart).strftime("%H:%M:%S")))
 
 	# Helper functions to update the end time of the event
 	# Should not be overriden.
@@ -195,6 +193,7 @@ class Event:
 			print("ERROR: call to setTimeEnd with no arguments.")
 
 		self.timeEnd = utcNow() + datetime.timedelta(seconds=duration)
+		self.eventLog("Start Time: {} [{}]".format(self.timeEnd, utcToTZ(self.timeEnd).strftime("%H:%M:%S")))
 
 	# Getter for self.status
 	# Returns true if the event is running, false otherwise

@@ -30,17 +30,14 @@ async def inssuficientPermissions(ctx):
 async def eventNotRunning(ctx):
 	await ctx.send("{}, this event is not running right now.".format(ctx.author.mention))
 
-def timeNow():
-	return datetime.datetime.now(tz=TIMEZONE)
+def timeTZ():
+	return utcToTZ(utcNow())
 
 def utcNow():
 	return datetime.datetime.now(datetime.timezone.utc)
 
-def dateNow():
-	return timeToDate(timeNow())
-
-def timeToDate(time):
-	return datetime.date.fromisoformat(time.strftime("%Y-%m-%d"))
+def utcToTZ(utcTime):
+	return utcTime.astimezone(TIMEZONE)
 
 def log(toLog):
 	if type(toLog) == discord.Message:
@@ -53,11 +50,12 @@ def log(toLog):
 	elif type(toLog) == str:
 		author = "DBOT LOG"
 		logContent = toLog
+
 	else:
 		author = "?ERROR?"
 		logContent = "Not parsed {} object.".format(type(toLog))
 
-	timeStamp = timeNow().strftime("[%H:%M:%S]")
+	timeStamp = timeTZ().strftime("[%H:%M:%S]")
 	logStr = "{} [{}]: {}".format(timeStamp, author, logContent)
 	print(logStr)
 	

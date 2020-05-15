@@ -1,6 +1,6 @@
 import datetime
 
-from scripts.helpers.aux_f import isAdmin, timeNow
+from scripts.helpers.aux_f import isAdmin, utcNow, utcToTZ
 from scripts.helpers.singletons import dbClient, Bot, EventManager
 from scripts.models.userprofile import UserProfile
 
@@ -66,10 +66,8 @@ def event_force_f(ctx, eventName, timeToExecution):
 	if event == -1:
 		return -2
 	else:
-		timeStart = timeNow() + datetime.timedelta(seconds=timeToExecution)
-		event.timeStart = timeStart
+		event.setTimeStart(timeToExecution)
 		msg = "{}, Event {} will start in {} seconds.".format(ctx.message.author.mention, event.name, timeToExecution)
-		event.eventLog("Start Time: {}".format(event.timeStart))
 
 	return msg
 

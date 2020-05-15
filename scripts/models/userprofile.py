@@ -3,7 +3,7 @@ import datetime
 from bson.codec_options import CodecOptions
 
 from scripts.helpers.singletons import dbClient, Bot
-from scripts.helpers.aux_f import TIMEZONE, utcNow, timeToDate, dateNow
+from scripts.helpers.aux_f import TIMEZONE, utcNow, timeTZ
 import scripts.commands.economy.economy_const as economy_const
 
 class UserProfile:
@@ -92,7 +92,7 @@ class UserProfile:
             return -1
 
     def ecoAbleToCollect(self):
-        return dateNow() > timeToDate(self.ecoTimeCollection)
+        return timeTZ().date() > self.ecoTimeCollection.date()
 
     def ecoIsLocked(self):
         return self.ecoLocked
@@ -149,7 +149,7 @@ class UserProfile:
             return -1
 
     def waifuAbleToSummon(self):
-        return dateNow() > timeToDate(self.waifuTimeSummoning)
+        return timeTZ().date() > self.waifuTimeSummoning.date()
 
 
     ###################

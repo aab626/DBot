@@ -8,7 +8,7 @@ import pymongo
 import scripts.commands.economy.economy_fAux as economy_fAux
 import scripts.commands.waifu.waifu_fAux as waifu_fAux
 import scripts.commands.waifu.waifu_const as waifu_const
-from scripts.helpers.aux_f import isAdmin, timeNow
+from scripts.helpers.aux_f import isAdmin, utcNow, utcToTZ
 from scripts.helpers.singletons import Bot, EventManager, dbClient
 from scripts.models.userprofile import UserProfile
 
@@ -127,7 +127,7 @@ def bid_f(user, bidAmount):
 		return -4
 
 	# If there is an event, check preliminary bidding info
-	t = timeNow()
+	t = utcNow()
 	extendedTime = False
 	if (waifuAHEvent.timeEnd - t).total_seconds() < waifuAHEvent.timeThresholdToExtend:
 		extendedTime = True
@@ -147,7 +147,7 @@ def bid_f(user, bidAmount):
 	embed.add_field(name="Bid Amount", value="{}".format(economy_fAux.pMoney(bidAmount)))
 
 	if extendedTime:
-		newEndTime = timeNow() + datetime.timedelta(seconds=waifuAHEvent.bidTimeExtension)
+		newEndTime = utcToTZ(utcNow() + datetime.timedelta(seconds=waifuAHEvent.bidTimeExtension))
 		tStr = "Auction will stop at {}.".format(newEndTime.strftime("%H:%M:%S"))
 		embed.add_field(name="Time Extended!", value=tStr)
 
