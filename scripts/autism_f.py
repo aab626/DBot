@@ -1,22 +1,19 @@
-import discord
-
-from scripts.autism_fAux import *
-
-from scripts.helpers.aux_f import *
-from scripts.helpers.dbClient import *
-from scripts.helpers.EventManager import *
-from scripts.helpers.Bot import *
-
-from PIL import Image, GifImagePlugin
 import random
 import string
 import os
 import time
 
+import discord
+from PIL import Image, GifImagePlugin
+
+from scripts.helpers.singletons import Bot, dbClient, EventManager
+from scripts.helpers.aux_f import scheduleDeleteFile
+import scripts.autism_fAux as autism_fAux
+
 def letter_moment(message):
 	if len(message.content) == 2:
 		if message.content[0] == Bot.getBot().command_prefix and message.content[1] in string.ascii_uppercase:
-			msgDict = letterMoment(message)
+			msgDict = autism_fAux.letterMoment(message)
 			return msgDict
 	else:
 		return -1
@@ -110,7 +107,7 @@ def choche_f(ctx):
 		return -1
 	else:
 		chocheGuess = " ".join(ctx.message.content.split(" ")[1:])
-		if checkChochePhrase(chocheGuess, chocheEvent.chochePhrase):
+		if autism_fAux.checkChochePhrase(chocheGuess, chocheEvent.chochePhrase):
 			chocheEvent.winnerUser = ctx.author
 			return 0
 		else:

@@ -1,6 +1,10 @@
-# Secret keys4
+# Secret keys
 *.secret
 keys/
+
+# IDEs
+.vscode/
+*.code-workspace
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

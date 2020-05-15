@@ -1,16 +1,16 @@
-import discord
-import discord.utils
-from discord.ext import commands
+# import discord
+# import discord.utils
+# from discord.ext import commands
 
-from scripts._aux_f import *
+# from scripts._aux_f import *
 
-from scripts.wargame_f import *
-from scripts.wargame_events import *
+# from scripts.wargame_f import *
+# from scripts.wargame_events import *
 
-import scripts.waifu_f as waifu_f
+# import scripts.waifu_f as waifu_f
 
-import random
-import datetime
+# import random
+# import datetime
 
 ##############
 # CONSTANTS

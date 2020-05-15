@@ -1,7 +1,8 @@
 import os
-import requests
 import json
 import random
+
+import requests
 import discord
 
 googleFolder = os.path.join(os.getcwd(), "resources", "google")

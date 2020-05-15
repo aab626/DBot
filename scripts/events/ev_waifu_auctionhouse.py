@@ -1,13 +1,14 @@
-from scripts.events.Event import Event
-
-from scripts.models.economy import *
-from scripts.models.waifu import *
-
-from scripts.waifu_fAux import *
-from scripts.economy_fAux import *
+import random
 
 import discord
-import random
+
+from scripts.events.Event import Event
+from scripts.helpers.aux_f import utcNow, TIMEZONE
+from scripts.models.waifu import WaifuProfile
+from scripts.models.economy import EcoProfile
+import scripts.waifu_fAux as waifu_fAux
+import scripts.economy_fAux as economy_fAux
+
 
 class waifuAuctionHouseEvent(Event):
 	def __init__(self, name, channel,
@@ -42,7 +43,7 @@ class waifuAuctionHouseEvent(Event):
 		self.status = True
 		self.setTimeEnd(self.duration)
 
-		self.waifu = getRandomWaifu()
+		self.waifu = waifu_fAux.getRandomWaifu()
 		self.startingBid = max(1, int(self.waifu["value"]*random.uniform(0.65, 0.95)))
 		self.buyoutPrize = random.randint(int(3.5*self.waifu["value"]), int(5*self.waifu["value"]))
 		self.bidStepUp = max(1, int((self.lastBid/self.waifu["value"]))**2)
@@ -64,7 +65,7 @@ class waifuAuctionHouseEvent(Event):
 			nameValueStr = self.waifu["name"]
 
 		embed.add_field(name="Basic Information", value="{}\nFrom: {}".format(nameValueStr, self.waifu["animeName"]), inline=True)
-		embed.add_field(name="Stats", value="Rank: {}\nRanking: {}/{}".format(self.waifu["rank"], self.waifu["ranking"], waifuCount(), inline=True))
+		embed.add_field(name="Stats", value="Rank: {}\nRanking: {}/{}".format(self.waifu["rank"], self.waifu["ranking"], waifu_fAux.waifuCount(), inline=True))
 
 		auctionStr1 = "Value: {}".format(self.waifu["value"])
 		auctionStr2 = "Min. Bid: {}".format(self.startingBid+1)
@@ -89,7 +90,7 @@ class waifuAuctionHouseEvent(Event):
 			newStepUp = max(1, int((self.lastBid/self.waifu["value"]))**2)
 			if newStepUp > self.bidStepUp:
 				self.bidStepUp = newStepUp
-				embed = discord.Embed(title="Waifu AH Bid STEP UP!", description="New minimum bid Step-Up: {}".format(pMoney(self.bidStepUp)))
+				embed = discord.Embed(title="Waifu AH Bid STEP UP!", description="New minimum bid Step-Up: {}".format(economy_fAux.pMoney(self.bidStepUp)))
 				await self.channel.send("", embed=embed)
 
 	async def eventPublishEnd(self):
@@ -98,7 +99,7 @@ class waifuAuctionHouseEvent(Event):
 			embed = discord.Embed(title=embedTitle, description="No one bidded for her \U0001F494")
 		else:
 			embed = discord.Embed(title=embedTitle, description="{} got {}! Congrats \U0001F496".format(self.user.name, self.waifu["name"]))
-			embed.add_field(name="Bidding", value="{} ({}% of Waifu Value)".format(pMoney(self.lastBid), int(round(self.lastBid/self.waifu["value"]*100, 1))))
+			embed.add_field(name="Bidding", value="{} ({}% of Waifu Value)".format(economy_fAux.pMoney(self.lastBid), int(round(self.lastBid/self.waifu["value"]*100, 1))))
 		
 		embed.set_thumbnail(url=random.choice(self.waifu["pictures"]))
 		await self.channel.send("", embed=embed)

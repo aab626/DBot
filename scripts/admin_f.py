@@ -1,9 +1,8 @@
-from scripts.economy_f import *
-from scripts.helpers.aux_f import *
-from scripts.helpers.dbClient import *
-from scripts.helpers.EventManager import *
-from scripts.helpers.Bot import *
-from scripts.models.economy import *
+import datetime
+
+from scripts.helpers.aux_f import isAdmin, timeNow
+from scripts.helpers.singletons import dbClient, Bot, EventManager
+from scripts.models.economy import EcoProfile
 
 async def shutdown_f(ctx):
 	if not isAdmin(ctx.author):

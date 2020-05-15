@@ -1,8 +1,7 @@
-from scripts.helpers.dbClient import *
-from scripts.helpers.Bot import *
-from scripts.models.waifu import *
-
 import random
+
+from scripts.models.waifu import WaifuProfile
+from scripts.helpers.singletons import dbClient, Bot
 
 WAIFU_RANKS = ["E", "D", "C", "B", "A", "S","SS", "SSS"]
 NO_FAV_WAIFU_URL = "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu.png"

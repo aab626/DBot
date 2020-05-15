@@ -1,10 +1,9 @@
-from scripts.events.Event import Event
-
-from scripts.economy_f import *
-from scripts.models.economy import *
-
 import discord
-import random
+
+from scripts.events.Event import Event
+from scripts.helpers.aux_f import utcNow
+from scripts.models.economy import EcoProfile
+import scripts.economy_fAux as economy_fAux
 
 class claimEvent(Event):
 	def __init__(self, name, channel,
@@ -33,7 +32,7 @@ class claimEvent(Event):
 		self.setTimeEnd(self.duration)
 
 	async def eventPublishStart(self):
-		embed = discord.Embed(title="Money event!", description="Grab some {} with >eco claim".format(CURRENCY_NAME_PLURAL))
+		embed = discord.Embed(title="Money event!", description="Grab some {} with >eco claim".format(economy_fAux.CURRENCY_NAME_PLURAL))
 		await self.channel.send("@here", embed=embed)
 
 	def endCondition(self):
@@ -58,7 +57,7 @@ class claimEvent(Event):
 		else:
 			prizeStrs = []
 			for user in self.prizeDict.keys():
-				prizeStr = "{}: {}".format(user.name, pMoney(self.prizeDict[user]))
+				prizeStr = "{}: {}".format(user.name, economy_fAux.pMoney(self.prizeDict[user]))
 				prizeStrs.append(prizeStr)
 
 			embedDescription = "Congratulations to the winners!\n"+"\n".join(prizeStrs)

@@ -1,12 +1,10 @@
-from scripts.helpers.dbClient import *
-from scripts.helpers.Bot import *
-
 import discord
-import pymongo
 import datetime
 import pytz
 import asyncio
 import os
+
+from scripts.helpers.singletons import Bot, dbClient
 
 ###############
 # CONSTANTS
@@ -43,12 +41,19 @@ def timeToDate(time):
 	return datetime.date.fromisoformat(time.strftime("%Y-%m-%d"))
 
 def log(toLog):
-	timeStamp = timeNow().strftime("[%H:%M:%S]")
-	if type(toLog) == discord.ext.commands.context.Context:
-		ctx = toLog
-		logStr = "{} {}: {}".format(timeStamp, ctx.author, ctx.message.content)
+	if type(toLog) == discord.Message:
+		message = toLog
+		author = message.author
+		logContent = message.content
 	elif type(toLog) == str:
-		logStr = "{} {}: {}".format(timeStamp, "[DBOT INFO]", toLog)
+		author = "DBOT LOG"
+		logContent = toLog
+	else:
+		author = "?ERROR?"
+		logContent = "Not parsed {} object.".format(type(toLog))
+
+	timeStamp = timeNow().strftime("[%H:%M:%S]")
+	logStr = "{} [{}]: {}".format(timeStamp, author, logContent)
 
 	print(logStr)
 
@@ -70,16 +75,6 @@ async def activityIn(channel, minUsers, timeThreshold):
 
 	# After all checks pass, return true
 	return True
-
-# returns an event doc from the db
-def getEventDoc(eventName):
-	mongoClient = dbClient.getClient()
-	mongoClient.DBot.events.find_one({"name": eventName})
-	return eventDoc
-
-def replaceEventDoc(eventName, newEventDoc):
-	mongoClient = dbClient.getClient()
-	mongoClient.DBot.events.replace_one({"name": eventName}, newEventDoc)
 
 def getEventChannel():
 	mongoClient = dbClient.getClient()

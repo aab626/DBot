@@ -1,9 +1,9 @@
-import discord
-
-from scripts.helpers.dbClient import *
-
 import os
 import random
+
+import discord
+
+from scripts.helpers.singletons import dbClient
 
 def letterMoment(message):
 	letter = message.content.strip(">").lower()

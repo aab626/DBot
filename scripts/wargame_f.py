@@ -1,15 +1,15 @@
-import discord
+# import discord
 
-from scripts._aux_f import *
-import scripts.waifu_f as waifu_f
+# from scripts._aux_f import *
+# import scripts.waifu_f as waifu_f
 
-from PIL import Image, ImageDraw, ImageFont
-import os
-import random
-import time
-import opensimplex
-import string
-import datetime
+# from PIL import Image, ImageDraw, ImageFont
+# import os
+# import random
+# import time
+# import opensimplex
+# import string
+# import datetime
 
 #################################
 # CONSTANTS AND STATIC FUNCTIONS

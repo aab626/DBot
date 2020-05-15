@@ -1,13 +1,13 @@
-import discord
+# import discord
 
-from scripts._aux_f import *
+# from scripts._aux_f import *
 
-from scripts.wargame_f import *
+# from scripts.wargame_f import *
 
-from scripts.economy_f import *
+# from scripts.economy_f import *
 
-import asyncio
-import datetime
+# import asyncio
+# import datetime
 
 ##############
 # CONSTANTS

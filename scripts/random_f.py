@@ -1,33 +1,74 @@
-import random
+import discord
 
-# internal function
-# return a dice throw
-def throwDice(faces=6):
-	return random.randint(1, faces)
+import scripts.random_fAux as random_fAux
 
-# internal function, sort groups
-# returns a list of lists, where each sub-list is a list of strings
-def makeGroup(groups, MembersPerGroup, playerListTuple):
-	playerList = []
-	for player in playerListTuple:
-		playerList.append(player)
+def dice_f(diceArgs):
+    if len(diceArgs) == 0:
+        diceSource = ["1d6"]
+    else:
+        diceSource = diceArgs
 
-	random.shuffle(playerList)
-	while groups*MembersPerGroup < len(playerList):
-		playerList.pop()
+    diceDict = dict()
+    for dice in diceSource:
+        throws, faces = [int(x) for x in dice.split("d")]
 
-	g = 0
-	i = 0
-	groupList = [[] for i in range(groups)]
-	while i < len(playerList):
-		groupList[g].append(playerList[i])
-		g += 1
+        for t in range(throws):
+            value = random_fAux.throwDice(faces)
 
-		if g >= groups:
-			g = 0
+            if faces not in diceDict.keys():
+                diceDict[faces] = []
 
-		i += 1
+            diceDict[faces].append(value)
 
-	random.shuffle(groupList)
+    sumDict = dict()
+    for faces in diceDict.keys():
+        if faces not in sumDict.keys():
+            sumDict[faces] = 0
 
-	return groupList
+        sumDict[faces] += sum(diceDict[faces])
+
+    # Assemble output embed			
+    keysSorted = list(diceDict.keys())
+    keysSorted.sort()
+    valueStrs = []
+    for faces in keysSorted:
+        valueStr_thisLine = "d{}: {} ({})".format(faces, ", ".join([str(t) for t in diceDict[faces]]), sumDict[faces])
+        valueStrs.append(valueStr_thisLine)
+
+    throwString = "\n".join(valueStrs)
+
+    successEmbed = discord.Embed(title="Throwing dice \U0001F3B2...")
+    successEmbed.add_field(name="Throws", value=throwString, inline=True)
+    successEmbed.add_field(name="Total", value=str(sum(sumDict.values())), inline=True)
+    
+    return successEmbed
+
+def teams_f(args):
+    nGroups = int(args[0])
+    nMembersPerGroup = int(args[1])
+    playerList = args[2:]
+    groupList = random_fAux.makeGroup(nGroups, nMembersPerGroup, playerList)
+
+    membersInGroup = []
+    for group in groupList:
+        for member in group:
+            membersInGroup.append(member)
+
+    membersLeftOut = [player for player in playerList if ((player in membersInGroup) == False)]
+
+    message_out = ""
+    for group in groupList:
+        message_out = message_out + "\nTeam {}: {}".format(groupList.index(group)+1, ", ".join(group))
+
+    message_out = message_out.strip("\n")
+
+    successEmbed = discord.Embed(title="Team Randomizer \U0001F38C")
+    for group in groupList:
+        fieldTitle = "Team {}".format(groupList.index(group)+1)
+        fieldValue = ", ".join(group)
+        successEmbed.add_field(name=fieldTitle, value=fieldValue, inline=False)
+
+    if len(membersLeftOut) > 0:
+        successEmbed.set_footer(text="Players left out: {}".format(", ".join(membersLeftOut)))
+
+    return successEmbed
