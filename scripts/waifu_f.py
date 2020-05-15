@@ -54,16 +54,13 @@ def waifu_list_f(ctx, args):
 			return -5
 
 	# Query waifus from DB
-	query = {"$and": [{"MAL_data.charID": {"$in": waifuProfile.waifuList}}, {"rank": {"$in": ranksQuery}}]}
-	waifuList = list(dbClient.getClient().DBot.waifus.find(query).sort("value", pymongo.DESCENDING))
-	# for waifuID in waifuProfile.waifuList:
-	# 	waifu = dbClient.getClient().DBot.waifus.find_one({"MAL_data.charID": waifuID})
-	# 	waifuList.append(waifu)
-	# waifuList.sort(key=lambda waifu: waifu["value"], reverse=True)
-
 	if duplicateMode:
-		duplicateDict = waifuProfile.getDuplicateWaifuIDs()
-		waifuList = [waifu for waifu in waifuList if waifu["MAL_data"]["charID"] in duplicateDict.keys()]
+		duplicateIDs = list(waifuProfile.getDuplicateWaifuIDs().keys())
+		query = {"$and": [{"MAL_data.charID": {"$in": duplicateIDs}}, {"rank": {"$in": ranksQuery}}]}
+	else:
+		query = {"$and": [{"MAL_data.charID": {"$in": list(set(waifuProfile.waifuList))}}, {"rank": {"$in": ranksQuery}}]}
+
+	waifuList = list(dbClient.getClient().DBot.waifus.find(query).sort("value", pymongo.DESCENDING))
 
 	if len(waifuList) == 0:
 		return -6
@@ -83,19 +80,22 @@ def waifu_list_f(ctx, args):
 	waifuStart = waifu_fAux.WAIFU_LIST_WAIFUS_PER_PAGE*(page-1)
 	waifuEnd = waifuStart + waifu_fAux.WAIFU_LIST_WAIFUS_PER_PAGE
 	for waifu in waifuList[waifuStart:waifuEnd]:
-		fieldName = "{}/{} \U0000300C{}\U0000300D: {}".format(
+		fieldName = "{}/{} \U0000300C{}\U0000300D: {} [{}]".format(
 			waifuList.index(waifu)+1,
 			len(waifuList),
 			waifu["rank"],
-			waifu["name"])
+			waifu["name"],
+			waifu["MAL_data"]["charID"])
 
 		fieldValue1 = "Source: {}".format(waifu["animeName"])
 		fieldValue2 = "Ranking: {}/{}\nValue: {}".format(waifu["ranking"], waifu_fAux.waifuCount(), waifu["value"])
-		fieldValue3 = "Waifu ID: {}".format(waifu["MAL_data"]["charID"])
-		fieldValues = [fieldValue1, fieldValue2, fieldValue3]
+		fieldValues = [fieldValue1, fieldValue2]
 
 		if duplicateMode:
-			fieldValue4 = "Count: {}".format(duplicateDict[waifu["MAL_data"]["charID"]])
+			fieldValue4 = "Count: {}".format(waifuProfile.waifuList.count(waifu["MAL_data"]["charID"]))
+			fieldValues.append(fieldValue4)
+		elif waifuProfile.waifuList.count(waifu["MAL_data"]["charID"]) > 1:
+			fieldValue4 = "Count: {}".format(waifuProfile.waifuList.count(waifu["MAL_data"]["charID"]))
 			fieldValues.append(fieldValue4)
 
 		embed.add_field(name=fieldName, value="\n".join(fieldValues), inline=False)
