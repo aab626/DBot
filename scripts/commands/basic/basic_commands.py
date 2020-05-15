@@ -2,8 +2,7 @@ from discord.ext import commands
 
 
 class Basic(commands.Cog):
-    def __init__(self, bot, eventChannel):
-        self.bot = bot
+    def __init__(self, eventChannel):
         self.eventChannel = eventChannel
 
     @commands.command()

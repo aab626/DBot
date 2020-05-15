@@ -14,8 +14,7 @@ WAIFU_LIST_WAIFUS_PER_PAGE = 5
 # WAIFU COG
 
 class Waifu(commands.Cog):
-	def __init__(self, bot, eventChannel):
-		self.bot = bot
+	def __init__(self, eventChannel):
 		self.eventChannel = eventChannel
 
 		# Add the events to the bot's event loop
@@ -33,7 +32,7 @@ class Waifu(commands.Cog):
 	@commands.group()
 	async def waifu(self, ctx):
 		if ctx.invoked_subcommand is None:
-			await ctx.send("{}, Invalid command,use `>help`.".format(ctx.message.author.mention))
+			await ctx.send("{}, Invalid command,use `>help`.".format(ctx.author.mention))
 
 	# syntax:
 	# >waifu list [page] [duplicates|-d|-D] [rank1 rank2...] [@user]
@@ -72,7 +71,7 @@ class Waifu(commands.Cog):
 				economy_fAux.pMoney(self.waifuAuctionHouseEvent.lastBid)))
 		elif code == -4:
 			await ctx.send("{}, the minimum bid must be at least {} higher than the previous one.".format(
-				ctx.message.author.mention,
+				ctx.author.mention,
 				economy_fAux.pMoney(self.waifuAuctionHouseEvent.bidStepUp)))
 		else:
 			embed = code
@@ -112,7 +111,7 @@ class Waifu(commands.Cog):
 	async def summon(self, ctx):
 		code = waifu_f.summon_f(ctx.author)
 		if code == -1:
-			await ctx.send("{}, you can summon only once per day.".format(ctx.message.author.mention))
+			await ctx.send("{}, you can summon only once per day.".format(ctx.author.mention))
 		else:
 			embed = code
 			await ctx.send("", embed=embed)

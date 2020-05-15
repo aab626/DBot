@@ -42,7 +42,7 @@ def event_info_f(ctx, eventName):
 	event = evManager.getEvent(eventName)
 
 	if event == -1:
-		msg = "{}, This event is not registered.".format(ctx.message.author.mention)
+		msg = "{}, This event is not registered.".format(ctx.author.mention)
 	else:
 		evLine1 = "Event Information"
 		evLine2 = "Name: {}".format(event.name)
@@ -67,7 +67,7 @@ def event_force_f(ctx, eventName, timeToExecution):
 		return -2
 	else:
 		event.setTimeStart(timeToExecution)
-		msg = "{}, Event {} will start in {} seconds.".format(ctx.message.author.mention, event.name, timeToExecution)
+		msg = "{}, Event {} will start in {} seconds.".format(ctx.author.mention, event.name, timeToExecution)
 
 	return msg
 
@@ -82,7 +82,7 @@ def channel_register_f(ctx):
 	return 0
 
 def channel_unregister_f(ctx):
-	if not isAdmin(ctx.message.author):
+	if not isAdmin(ctx.author):
 		return -1
 
 	mongoClient = dbClient.getClient()

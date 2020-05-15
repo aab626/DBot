@@ -9,8 +9,7 @@ import scripts.commands.google.google_f as google_f
 
 # Google cog
 class Google(commands.Cog):
-	def __init__(self, bot, eventChannel):
-		self.bot = bot
+	def __init__(self, eventChannel):
 		self.eventChannel = eventChannel
 
 		with io.open(os.path.join(os.getcwd(), "keys", "google.secret"), "r", encoding="utf-8") as f:
@@ -23,7 +22,7 @@ class Google(commands.Cog):
 	@commands.group()
 	async def google(self, ctx):
 		if ctx.invoked_subcommand is None:
-			await ctx.send("{}, Invalid command, use `>help` instead.".format(ctx.message.author.mention))
+			await ctx.send("{}, Invalid command, use `>help` instead.".format(ctx.author.mention))
 
 	# sends first image
 	@google.command()

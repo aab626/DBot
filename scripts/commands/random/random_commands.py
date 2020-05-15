@@ -4,14 +4,13 @@ from discord.ext import commands
 import scripts.commands.random.random_f as random_f
 
 class Random(commands.Cog):
-	def __init__(self, bot, eventChannel):
-		self.bot = bot
+	def __init__(self, eventChannel):
 		self.eventChannel = eventChannel
 
 	@commands.group()
 	async def random(self, ctx):
 		if ctx.invoked_subcommand is None:
-			await ctx.send("{}, Invalid command use `>help random` instead".format(ctx.message.author.mention))
+			await ctx.send("{}, Invalid command use `>help random` instead".format(ctx.author.mention))
 
 	# random dice
 	# throws a dice with a passed string

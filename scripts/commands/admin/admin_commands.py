@@ -29,7 +29,7 @@ class Admin(commands.Cog):
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == 0:
-			await ctx.send("{}, {} balance was changed by {}.".format(ctx.message.author.mention,
+			await ctx.send("{}, {} balance was changed by {}.".format(ctx.author.mention,
 																mentionedUser.mention,
 																economy_fAux.pMoney(changeAmount)))
 		return 0
@@ -84,7 +84,7 @@ class Admin(commands.Cog):
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == 0:
-			await ctx.send("{}, channel registered successfully.".format(ctx.message.author.mention))
+			await ctx.send("{}, channel registered successfully.".format(ctx.author.mention))
 
 		return 0
 

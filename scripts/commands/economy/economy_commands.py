@@ -29,7 +29,7 @@ class Economy(commands.Cog):
     @commands.group()
     async def eco(self, ctx):
         if ctx.invoked_subcommand is None:
-            await ctx.send("{}, Invalid command, use `>help`".format(ctx.message.author.mention))
+            await ctx.send("{}, Invalid command, use `>help`".format(ctx.author.mention))
 
     @eco.command()
     async def balance(self, ctx, userMentioned: discord.User = None):
