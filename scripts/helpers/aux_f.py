@@ -4,6 +4,8 @@ import pytz
 import asyncio
 import os
 
+import discord.utils
+
 from scripts.helpers.singletons import Bot, dbClient
 
 ###############
@@ -45,6 +47,9 @@ def log(toLog):
 		message = toLog
 		author = message.author
 		logContent = message.content
+		for user in message.mentions:
+			logContent = logContent.replace("<@!{}>".format(user.id), str(user))
+
 	elif type(toLog) == str:
 		author = "DBOT LOG"
 		logContent = toLog
@@ -54,8 +59,8 @@ def log(toLog):
 
 	timeStamp = timeNow().strftime("[%H:%M:%S]")
 	logStr = "{} [{}]: {}".format(timeStamp, author, logContent)
-
 	print(logStr)
+	
 
 # returns true if there was messages from a minimum qty of non-bot users at most timeThreshold seconds ago
 async def activityIn(channel, minUsers, timeThreshold):

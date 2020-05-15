@@ -1,7 +1,7 @@
 import discord
 from discord.ext import commands
 
-import scripts.random_f as random_f
+import scripts.commands.random.random_f as random_f
 
 class Random(commands.Cog):
 	def __init__(self, bot, eventChannel):

@@ -4,8 +4,7 @@ import discord
 
 from scripts.events.Event import Event
 from scripts.helpers.aux_f import utcNow, TIMEZONE
-from scripts.models.waifu import WaifuProfile
-from scripts.models.economy import EcoProfile
+from scripts.models.userprofile import UserProfile
 import scripts.waifu_fAux as waifu_fAux
 import scripts.economy_fAux as economy_fAux
 
@@ -106,8 +105,9 @@ class waifuAuctionHouseEvent(Event):
 
 	def eventStop(self):
 		if self.user != None:
-			EcoProfile.load(self.user).changeBalance(-self.lastBid)
-			WaifuProfile.load(self.user).addWaifu(self.waifu)
+			profile = UserProfile.load(self.user)
+			profile.ecoChangeBalance(-self.lastBid)
+			profile.waifuAdd(self.waifu)
 
 		self.status = False
 		self.setTimeStart(self.minWait, self.maxWait)

@@ -4,7 +4,7 @@ import json
 
 from discord.ext import commands
 
-import scripts.google_f as google_f
+import scripts.commands.google.google_f as google_f
 
 
 # Google cog
@@ -28,11 +28,11 @@ class Google(commands.Cog):
 	# sends first image
 	@google.command()
 	async def img(self, ctx, *, query):
-		embed = google_f.google_img_f(ctx.author, query, self.google_APIKey, self.google_CSEID)
+		embed = google_f.img_f(ctx.author, query, self.google_APIKey, self.google_CSEID)
 		await ctx.send("", embed=embed)
 
 
 	@google.command(aliases=["imgr"])
 	async def imgrandom(self, ctx, *, query):
-		embed = google_f.google_imgrandom_f(ctx.author, query, self.google_APIKey, self.google_CSEID)
+		embed = google_f.imgrandom_f(ctx.author, query, self.google_APIKey, self.google_CSEID)
 		await ctx.send("", embed=embed)

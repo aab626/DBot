@@ -2,7 +2,7 @@ import datetime
 
 from scripts.helpers.aux_f import isAdmin, timeNow
 from scripts.helpers.singletons import dbClient, Bot, EventManager
-from scripts.models.economy import EcoProfile
+from scripts.models.userprofile import UserProfile
 
 async def shutdown_f(ctx):
 	if not isAdmin(ctx.author):
@@ -13,14 +13,14 @@ async def shutdown_f(ctx):
 	await Bot.getBot().close()
 	return 0
 
-def admin_addmoney(ctx, user, changeAmount):
+def addmoney_f(ctx, user, changeAmount):
 	if not isAdmin(ctx.author):
 		return -1
 	else:
-		EcoProfile.load(user).changeBalance(changeAmount, forced=True)
+		UserProfile.load(user).ecoChangeBalance(changeAmount, forced=True)
 		return 0
 
-def admin_event_list(ctx):
+def event_list_f(ctx):
 	if not isAdmin(ctx.author):
 		return -1
 
@@ -34,7 +34,7 @@ def admin_event_list(ctx):
 
 	return msg
 
-def admin_event_info(ctx, eventName):
+def event_info_f(ctx, eventName):
 	if not isAdmin(ctx.author):
 		return -1
 
@@ -56,7 +56,7 @@ def admin_event_info(ctx, eventName):
 
 	return msg
 
-def admin_event_force(ctx, eventName, timeToExecution):
+def event_force_f(ctx, eventName, timeToExecution):
 	if not isAdmin(ctx.author):
 		return -1
 
@@ -73,7 +73,7 @@ def admin_event_force(ctx, eventName, timeToExecution):
 
 	return msg
 
-def admin_channel_register(ctx):
+def channel_register_f(ctx):
 	if not isAdmin(ctx.author):
 		return -1
 
@@ -83,7 +83,7 @@ def admin_channel_register(ctx):
 	mongoClient.DBot.config.insert_one(channelRegDoc)
 	return 0
 
-def admin_channel_unregister(ctx):
+def channel_unregister_f(ctx):
 	if not isAdmin(ctx.message.author):
 		return -1
 
@@ -91,7 +91,7 @@ def admin_channel_unregister(ctx):
 	mongoClient.DBot.config.delete_one({"channelID": ctx.channel.id})
 	return 0
 
-def admin_add(ctx, mentionedUser):
+def add_f(ctx, mentionedUser):
 	if not isAdmin(ctx.author):
 		return -1
 
@@ -104,7 +104,7 @@ def admin_add(ctx, mentionedUser):
 	else:
 		return -2
 
-def admin_remove(ctx, mentionedUser):
+def remove_f(ctx, mentionedUser):
 	if not isAdmin(ctx.author):
 		return -1
 

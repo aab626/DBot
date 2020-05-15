@@ -1,10 +1,11 @@
 import discord
 import pymongo
 
-import scripts.economy_fAux as economy_fAux
+import scripts.commands.economy.economy_fAux as economy_fAux
+import scripts.commands.economy.economy_const as economy_const
 from scripts.helpers.aux_f import isAdmin
 from scripts.helpers.singletons import Bot, EventManager, dbClient
-from scripts.models.economy import EcoProfile
+from scripts.models.userprofile import UserProfile
 
 
 def balance_f(ctx, userMentioned):
@@ -16,28 +17,28 @@ def balance_f(ctx, userMentioned):
     else:
         targetUser = ctx.author
 
-    profile = EcoProfile.load(targetUser)
+    profile = UserProfile.load(targetUser)
 
     embedTitle = "{}'s Balance".format(profile.user.name)
-    embedDescription = economy_fAux.pMoney(profile.balance)
+    embedDescription = economy_fAux.pMoney(profile.ecoBalance)
     embed = discord.Embed(title=embedTitle, description=embedDescription)
     return embed
 
 
 def lottery_f(user, gamesToPlay):
-    if gamesToPlay > economy_fAux.LOTTERY_MAX_GAMES_ALLOWED:
+    if gamesToPlay > economy_const.LOTTERY_MAX_GAMES_ALLOWED:
         return -1
 
-    profile = EcoProfile.load(user)
-    if profile.isLocked():
+    profile = UserProfile.load(user)
+    if profile.ecoIsLocked():
         return -2
 
-    totalCost = economy_fAux.LOTTERY_COST * gamesToPlay
-    if not profile.checkBalance(totalCost):
+    totalCost = economy_const.LOTTERY_COST * gamesToPlay
+    if not profile.ecoCheckBalance(totalCost):
         return -3
 
     # When all checks pass, lock the profile
-    profile.lock()
+    profile.ecoLock()
 
     # Play lottery and assemble report embed
     lotteryReport = economy_fAux.gameLottery(gamesToPlay)
@@ -71,21 +72,21 @@ def lottery_f(user, gamesToPlay):
         embed.set_footer(text="Booooooooooring")
 
     # Make balance changes and unlock profile
-    profile.changeBalance(totalPrize-totalCost)
-    profile.unlock()
+    profile.ecoChangeBalance(totalPrize-totalCost)
+    profile.ecoUnlock()
 
     return embed
 
 
 def collect_f(user):
-    profile = EcoProfile.load(user)
-    code = profile.collect()
+    profile = UserProfile.load(user)
+    code = profile.ecoCollect()
     if code == -1:
         return -1
     elif code == 0:
+        profile.ecoChangeBalance(economy_const.COLLECTION_MONEY, forced=True)
         embedTitle = "Welfare Collected!"
-        embedDescription = "You just collected your daily {}".format(
-            economy_fAux.pMoney(EcoProfile.COLLECTION_MONEY))
+        embedDescription = "You just collected your daily {}".format(economy_fAux.pMoney(economy_const.COLLECTION_MONEY))
         embed = discord.Embed(title=embedTitle, description=embedDescription)
         return embed
 
@@ -107,19 +108,19 @@ def pay_f(originUser, destinationUser, amount):
     if amount <= 0:
         return -1
 
-    originProfile = EcoProfile.load(originUser)
-    if originProfile.isLocked():
+    originProfile = UserProfile.load(originUser)
+    if originProfile.ecoIsLocked():
         return -2
 
-    destinationProfile = EcoProfile.load(destinationUser)
-    if destinationProfile.isLocked():
+    destinationProfile = UserProfile.load(destinationUser)
+    if destinationProfile.ecoIsLocked():
         return -3
 
-    if not originProfile.checkBalance(amount):
+    if not originProfile.ecoCheckBalance(amount):
         return -4
 
-    originProfile.changeBalance(-amount)
-    destinationProfile.changeBalance(amount)
+    originProfile.ecoChangeBalance(-amount)
+    destinationProfile.ecoChangeBalance(amount)
 
     embedTitle = "Successful transaction"
     embedDescription = "{} just sent {} to {}.".format(
@@ -133,15 +134,14 @@ def ranking_f():
                           description="Top 5 based on total Balance.")
 
     mongoClient = dbClient.getClient()
-    ecoDocs = list(mongoClient.DBot.economy.find(
-        {}).sort("balance", pymongo.DESCENDING))
+    userDocs = list(mongoClient.DBot.economy.find({}).sort("balance", pymongo.DESCENDING))
 
-    selectedDocs = ecoDocs[:5]
-    for ecoDoc in selectedDocs:
-        profile = EcoProfile.load(Bot.getBot().get_user(ecoDoc["user"]["id"]))
-        fieldName = "{}/{}: {}".format(selectedDocs.index(ecoDoc)+1,
+    selectedDocs = userDocs[:5]
+    for userDoc in selectedDocs:
+        profile = UserProfile.load(Bot.getBot().get_user(userDoc["user"]["id"]))
+        fieldName = "{}/{}: {}".format(selectedDocs.index(userDoc)+1,
                                        len(selectedDocs), profile.user.name)
-        fieldValue = "Balance: {}".format(economy_fAux.pMoney(profile.balance))
+        fieldValue = "Balance: {}".format(economy_fAux.pMoney(profile.ecoBalance))
         embed.add_field(name=fieldName, value=fieldValue, inline=False)
 
     return embed

@@ -5,17 +5,17 @@ import random
 import discord
 import pymongo
 
-import scripts.economy_fAux as economy_fAux
-import scripts.waifu_fAux as waifu_fAux
+import scripts.commands.economy.economy_fAux as economy_fAux
+import scripts.commands.waifu.waifu_fAux as waifu_fAux
+import scripts.commands.waifu.waifu_const as waifu_const
 from scripts.helpers.aux_f import isAdmin, timeNow
 from scripts.helpers.singletons import Bot, EventManager, dbClient
-from scripts.models.economy import EcoProfile
-from scripts.models.waifu import WaifuProfile
+from scripts.models.userprofile import UserProfile
 
 ###########
 # FUNCTIONS
 
-def waifu_list_f(ctx, args):
+def list_f(ctx, args):
 	# parse args
 	# parse page number
 	numbers = [int(arg) for arg in args if arg.isdigit()]
@@ -24,8 +24,8 @@ def waifu_list_f(ctx, args):
 	page = numbers[0] if len(numbers) == 1 else 1
 
 	# parse ranks
-	ranksInArgs = [arg for arg in args if (arg.upper() in waifu_fAux.WAIFU_RANKS)]
-	ranksQuery = ranksInArgs if len(ranksInArgs) > 0 else waifu_fAux.WAIFU_RANKS
+	ranksInArgs = [arg for arg in args if (arg.upper() in waifu_const.WAIFU_RANKS)]
+	ranksQuery = ranksInArgs if len(ranksInArgs) > 0 else waifu_const.WAIFU_RANKS
 
 	# parse target user
 	mentions = ctx.message.mentions
@@ -45,9 +45,9 @@ def waifu_list_f(ctx, args):
 		duplicateMode = True
 
 	# Get waifu profile
-	waifuProfile = WaifuProfile.load(ctx.author)
+	profile = UserProfile.load(ctx.author)
 
-	if len(waifuProfile.waifuList) == 0:
+	if len(profile.waifuList) == 0:
 		if targetUser == ctx.author:
 			return -4
 		else:
@@ -55,18 +55,18 @@ def waifu_list_f(ctx, args):
 
 	# Query waifus from DB
 	if duplicateMode:
-		duplicateIDs = list(waifuProfile.getDuplicateWaifuIDs().keys())
+		duplicateIDs = list(profile.waifuGetDuplicateWaifuDict().keys())
 		query = {"$and": [{"MAL_data.charID": {"$in": duplicateIDs}}, {"rank": {"$in": ranksQuery}}]}
 	else:
-		query = {"$and": [{"MAL_data.charID": {"$in": list(set(waifuProfile.waifuList))}}, {"rank": {"$in": ranksQuery}}]}
+		query = {"$and": [{"MAL_data.charID": {"$in": list(set(profile.waifuList))}}, {"rank": {"$in": ranksQuery}}]}
 
 	waifuList = list(dbClient.getClient().DBot.waifus.find(query).sort("value", pymongo.DESCENDING))
 
 	if len(waifuList) == 0:
 		return -6
 
-	if waifuProfile.waifuFavorite is not None:
-		waifuFav = waifu_fAux.getWaifu(waifuProfile.waifuFavorite)
+	if profile.waifuFavorite is not None:
+		waifuFav = waifu_fAux.getWaifu(profile.waifuFavorite)
 		embedDescription = "Favorite Waifu: {}{}\nFrom: {}".format(
 			waifuFav["name"],
 			"" if waifuFav["aliases"] == [] else ", alias {}".format(random.choice(waifuFav["aliases"])),
@@ -74,11 +74,11 @@ def waifu_list_f(ctx, args):
 		thumbnail_url = random.choice(waifuFav["pictures"])
 	else:
 		embedDescription = discord.Embed.Empty
-		thumbnail_url = waifu_fAux.NO_FAV_WAIFU_URL
+		thumbnail_url = random.choice(waifu_const.NO_FAV_WAIFU_URLS)
 
-	embed = discord.Embed(title="{}'s Harem".format(waifuProfile.user.name), description=embedDescription)
-	waifuStart = waifu_fAux.WAIFU_LIST_WAIFUS_PER_PAGE*(page-1)
-	waifuEnd = waifuStart + waifu_fAux.WAIFU_LIST_WAIFUS_PER_PAGE
+	embed = discord.Embed(title="{}'s Harem".format(profile.user.name), description=embedDescription)
+	waifuStart = waifu_const.WAIFU_LIST_WAIFUS_PER_PAGE*(page-1)
+	waifuEnd = waifuStart + waifu_const.WAIFU_LIST_WAIFUS_PER_PAGE
 	for waifu in waifuList[waifuStart:waifuEnd]:
 		fieldName = "{}/{} \U0000300C{}\U0000300D: {} [{}]".format(
 			waifuList.index(waifu)+1,
@@ -92,32 +92,32 @@ def waifu_list_f(ctx, args):
 		fieldValues = [fieldValue1, fieldValue2]
 
 		if duplicateMode:
-			fieldValue4 = "Count: {}".format(waifuProfile.waifuList.count(waifu["MAL_data"]["charID"]))
+			fieldValue4 = "Count: {}".format(profile.waifuList.count(waifu["MAL_data"]["charID"]))
 			fieldValues.append(fieldValue4)
-		elif waifuProfile.waifuList.count(waifu["MAL_data"]["charID"]) > 1:
-			fieldValue4 = "Count: {}".format(waifuProfile.waifuList.count(waifu["MAL_data"]["charID"]))
+		elif profile.waifuList.count(waifu["MAL_data"]["charID"]) > 1:
+			fieldValue4 = "Count: {}".format(profile.waifuList.count(waifu["MAL_data"]["charID"]))
 			fieldValues.append(fieldValue4)
 
 		embed.add_field(name=fieldName, value="\n".join(fieldValues), inline=False)
 
-	embed.add_field(name="Total Waifu Value", value="{}".format(economy_fAux.pMoney(waifuProfile.getTotalValue())), inline=False)
+	embed.add_field(name="Total Waifu Value", value="{}".format(economy_fAux.pMoney(profile.waifuGetTotalValue())), inline=False)
 
 	embed.set_thumbnail(url=thumbnail_url)
-	footerText1 = "Waifu Harem page: {} of {}.".format(page, math.ceil(len(waifuList)/waifu_fAux.WAIFU_LIST_WAIFUS_PER_PAGE))
+	footerText1 = "Waifu Harem page: {} of {}.".format(page, math.ceil(len(waifuList)/waifu_const.WAIFU_LIST_WAIFUS_PER_PAGE))
 	footerText2 = "Search other pages using `>waifu list <page>`"
 	embed.set_footer(text=footerText1 + "\n" + footerText2)
 
 	return embed
 
-def waifu_bid_f(user, bidAmount):
+def bid_f(user, bidAmount):
 	eventManager = EventManager.getEventManager()
 	waifuAHEvent = eventManager.getEvent("waifuAH")
 
 	if not waifuAHEvent.isRunning():
 		return -1
 
-	ecoProfile = EcoProfile.load(user)
-	if not ecoProfile.checkBalance(bidAmount):
+	profile = UserProfile.load(user)
+	if not profile.ecoCheckBalance(bidAmount):
 		return -2
 
 	if bidAmount <= waifuAHEvent.lastBid:
@@ -134,8 +134,8 @@ def waifu_bid_f(user, bidAmount):
 
 	# Eco unlock previous bidder and eco lock current one
 	if waifuAHEvent.user is not None:
-		EcoProfile.load(waifuAHEvent.user).unlock()
-	ecoProfile.lock()
+		UserProfile.load(waifuAHEvent.user).ecoUnlock()
+	profile.ecoLock()
 
 	# Set this user as current bidder in event
 	waifuAHEvent.user = user
@@ -153,20 +153,20 @@ def waifu_bid_f(user, bidAmount):
 
 	return embed
 
-def waifu_favorite_f(user, favArg):
+def favorite_f(user, favArg):
 	if not (favArg.lower() == "clear" or favArg.isdigit()):
 		return -2
 
-	waifuProfile = WaifuProfile.load(user)
+	profile = UserProfile.load(user)
 	if favArg.lower() == "clear":
-		waifuProfile.clearFavorite()
+		profile.waifuClearFavorite()
 		return 1
 	if favArg.isdigit():
 		newFavWaifuID = int(favArg)
-		code = waifuProfile.setFavorite(newFavWaifuID)
+		code = profile.waifuSetFavorite(newFavWaifuID)
 		return code
 
-def waifu_ranking_f(user, rankArg):
+def ranking_f(user, rankArg):
 	if rankArg == "me":
 		rankingPos = waifu_fAux.getWaifuRankingPosition(user)
 		rankingLength = waifu_fAux.getWaifuProfileCount()
@@ -174,9 +174,9 @@ def waifu_ranking_f(user, rankArg):
 	else:
 		embed = discord.Embed(title="Waifu Ranking", description="Top 5 based on Total Waifu Value.")
 		i = 1
-		for waifuProfile in waifu_fAux.getWaifuRankingList()[:5]:
-			fieldName = "{}/5: {}".format(i, waifuProfile.user.name)
-			fieldValue = "Total Value: {}, with {} waifus".format(waifuProfile.getTotalValue(), len(waifuProfile.waifuList))
+		for profile in waifu_fAux.getWaifuRankingList()[:5]:
+			fieldName = "{}/5: {}".format(i, profile.user.name)
+			fieldValue = "Total Value: {}, with {} waifus".format(profile.waifuGetTotalValue(), len(profile.waifuList))
 			embed.add_field(name=fieldName, value=fieldValue, inline=False)
 			i += 1
 
@@ -188,11 +188,11 @@ def waifu_ranking_f(user, rankArg):
 # -1			one of the waifus is not owned by the user
 # -2			waifus with different rank
 # -3			a SSS waifu was entered
-def waifu_fuse_f(user, waifuID1, waifuID2, waifuID3):
-	waifuProfile = WaifuProfile.load(user)
+def fuse_f(user, waifuID1, waifuID2, waifuID3):
+	profile = UserProfile.load(user)
 
 	# check if all of the 3 waifus are owned by the user
-	waifuListCopy = waifuProfile.waifuList[:]
+	waifuListCopy = profile.waifuList[:]
 	try:
 		waifuListCopy.remove(waifuID1)
 		waifuListCopy.remove(waifuID2)
@@ -212,16 +212,16 @@ def waifu_fuse_f(user, waifuID1, waifuID2, waifuID3):
 		return -3
 
 	# if all checks passed, get the a next-rank waifu
-	nextRank = waifu_fAux.WAIFU_RANKS[waifu_fAux.WAIFU_RANKS.index(waifu1["rank"])+1]
+	nextRank = waifu_const.WAIFU_RANKS[waifu_const.WAIFU_RANKS.index(waifu1["rank"])+1]
 
 	# Remove waifus from user profile
-	waifuProfile.removeWaifu(waifu1)
-	waifuProfile.removeWaifu(waifu2)
-	waifuProfile.removeWaifu(waifu3)
+	profile.waifuRemove(waifu1)
+	profile.waifuRemove(waifu2)
+	profile.waifuRemove(waifu3)
 
 	# Get random fused waifu
 	fusedWaifu = waifu_fAux.getRandomWaifuByRank(nextRank)
-	waifuProfile.addWaifu(fusedWaifu)
+	profile.waifuAdd(fusedWaifu)
 
 	# Assemble embed
 	embedTitle = "\U0001F9EC {}'s Waifu Fusion! \U0001F9EC".format(user)
@@ -242,15 +242,15 @@ def waifu_fuse_f(user, waifuID1, waifuID2, waifuID3):
 
 	return embed
 
-def waifu_summon_f(user):
-	waifuProfile = WaifuProfile.load(user)
-	code = waifuProfile.summonWaifu()
+def summon_f(user):
+	profile = UserProfile.load(user)
+	code = profile.waifuSummon()
 
 	if code == -1:
 		return -1
 
 	waifu = waifu_fAux.getRandomWaifuByRank(waifu_fAux.getSummonRank())
-	waifuProfile.addWaifu(waifu)
+	profile.waifuAdd(waifu)
 
 	embedTitle = "\U00002728 {}'s Waifu Summon \U00002728".format(user)
 	embedDescription = "You summoned a {}-tier Waifu!".format(waifu["rank"])

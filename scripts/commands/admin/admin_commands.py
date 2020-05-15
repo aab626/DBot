@@ -1,8 +1,8 @@
 import discord
 from discord.ext import commands
 
-import scripts.admin_f as admin_f
-import scripts.economy_fAux as economy_fAux
+import scripts.commands.admin.admin_f as admin_f
+import scripts.commands.economy.economy_fAux as economy_fAux
 from scripts.helpers.aux_f import inssuficientPermissions
 
 ####################################################
@@ -25,7 +25,7 @@ class Admin(commands.Cog):
 
 	@admin.command()
 	async def addmoney(self, ctx, mentionedUser: discord.User, changeAmount: int):
-		code = admin_f.admin_addmoney(ctx, mentionedUser, changeAmount)
+		code = admin_f.addmoney_f(ctx, mentionedUser, changeAmount)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == 0:
@@ -40,7 +40,7 @@ class Admin(commands.Cog):
 
 	@event.command()
 	async def list(self, ctx):
-		code = admin_f.admin_event_list(ctx)
+		code = admin_f.event_list_f(ctx)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		else:
@@ -52,7 +52,7 @@ class Admin(commands.Cog):
 
 	@event.command()
 	async def info(self, ctx, eventName: str):
-		code = admin_f.admin_event_info(ctx, eventName)
+		code = admin_f.event_info_f(ctx, eventName)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		else:
@@ -64,7 +64,7 @@ class Admin(commands.Cog):
 
 	@event.command()
 	async def force(self, ctx, eventName: str, timeToExecution: int):
-		code = admin_f.admin_event_force(ctx, eventName, timeToExecution)
+		code = admin_f.event_force_f(ctx, eventName, timeToExecution)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == -2:
@@ -80,7 +80,7 @@ class Admin(commands.Cog):
 
 	@channel.command()
 	async def register(self, ctx):
-		code = admin_f.admin_channel_register(ctx)
+		code = admin_f.channel_register_f(ctx)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == 0:
@@ -90,7 +90,7 @@ class Admin(commands.Cog):
 
 	@channel.command()
 	async def unregister(self, ctx):
-		code = admin_f.admin_channel_unregister(ctx)
+		code = admin_f.channel_unregister_f(ctx)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == 0:
@@ -100,7 +100,7 @@ class Admin(commands.Cog):
 
 	@admin.command()
 	async def add(self, ctx, mentionedUser: discord.User):
-		code = admin_f.admin_add(ctx, mentionedUser)
+		code = admin_f.add_f(ctx, mentionedUser)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == -2:
@@ -112,7 +112,7 @@ class Admin(commands.Cog):
 
 	@admin.command()
 	async def remove(self, ctx, mentionedUser: discord.User):
-		code = admin_f.admin_remove(ctx, mentionedUser)
+		code = admin_f.remove_f(ctx, mentionedUser)
 		if code == -1:
 			await inssuficientPermissions(ctx)
 		elif code == -2:

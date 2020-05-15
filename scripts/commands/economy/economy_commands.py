@@ -1,8 +1,9 @@
 import discord
 from discord.ext import commands
 
-import scripts.economy_f as economy_f
-import scripts.economy_fAux as economy_fAux
+import scripts.commands.economy.economy_f as economy_f
+import scripts.commands.economy.economy_fAux as economy_fAux
+import scripts.commands.economy.economy_const as economy_const
 from scripts.events.ev_economy_claim import claimEvent
 
 
@@ -44,7 +45,7 @@ class Economy(commands.Cog):
     async def lottery(self, ctx, gamesToPlay: int):
         code = economy_f.lottery_f(ctx.author, gamesToPlay)
         if code == -1:
-            await ctx.send("{}, you can play at most {} lotteries at the same time.".format(ctx.author.mention, economy_fAux.LOTTERY_MAX_GAMES_ALLOWED))
+            await ctx.send("{}, you can play at most {} lotteries at the same time.".format(ctx.author.mention, economy_const.LOTTERY_MAX_GAMES_ALLOWED))
         elif code == -2:
             await ctx.send("{}, your economy profile is currently locked.".format(ctx.author.mention))
         elif code == -3:

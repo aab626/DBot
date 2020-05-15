@@ -10,13 +10,13 @@ import pymongo
 from discord.ext import commands
 
 # Commands
-import scripts.admin_commands
-import scripts.autism_commands
-import scripts.basic_commands
-import scripts.economy_commands
-import scripts.google_commands
-import scripts.random_commands
-import scripts.waifu_commands
+import scripts.commands.admin.admin_commands as admin_commands
+import scripts.commands.autism.autism_commands as autism_commands
+import scripts.commands.basic.basic_commands as basic_commands
+import scripts.commands.economy.economy_commands as economy_commands
+import scripts.commands.google.google_commands as google_commands
+import scripts.commands.random.random_commands as random_commands
+import scripts.commands.waifu.waifu_commands as waifu_commands
 
 from scripts.helpers.aux_f import getEventChannel, isAdmin, log
 from scripts.helpers.singletons import Bot
@@ -47,13 +47,13 @@ async def on_ready():
     eventChannel = getEventChannel()
 
     log("Loading cogs")
-    bot.add_cog(scripts.random_commands.Random(bot, eventChannel))
-    bot.add_cog(scripts.google_commands.Google(bot, eventChannel))
-    bot.add_cog(scripts.basic_commands.Basic(bot, eventChannel))
-    bot.add_cog(scripts.economy_commands.Economy(eventChannel))
-    bot.add_cog(scripts.waifu_commands.Waifu(bot, eventChannel))
-    bot.add_cog(scripts.admin_commands.Admin(eventChannel))
-    bot.add_cog(scripts.autism_commands.Autism(eventChannel))
+    bot.add_cog(random_commands.Random(bot, eventChannel))
+    bot.add_cog(google_commands.Google(bot, eventChannel))
+    bot.add_cog(basic_commands.Basic(bot, eventChannel))
+    bot.add_cog(economy_commands.Economy(eventChannel))
+    bot.add_cog(waifu_commands.Waifu(bot, eventChannel))
+    bot.add_cog(admin_commands.Admin(eventChannel))
+    bot.add_cog(autism_commands.Autism(eventChannel))
     # bot.add_cog(wargame_c.Wargame(bot, eventChannel))
     log("All cogs loaded")
 

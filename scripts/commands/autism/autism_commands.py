@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-import scripts.autism_f as autism_f
+import scripts.commands.autism.autism_f as autism_f
 from scripts.events.ev_autism_choche import chocheEvent
 from scripts.helpers.aux_f import eventNotRunning
 
@@ -10,7 +10,7 @@ from scripts.helpers.aux_f import eventNotRunning
 
 # Autism On event message
 async def on_message(message):
-    letter_moment_code = autism_f.letter_moment(message)
+    letter_moment_code = autism_f.letter_moment_f(message)
     if type(letter_moment_code) == dict:
         msgDict = letter_moment_code
         await message.channel.send(msgDict["msg"], file=msgDict["file"])

@@ -1,11 +1,9 @@
 import random
 
-from scripts.models.waifu import WaifuProfile
+import scripts.commands.waifu.waifu_const as waifu_const
+from scripts.models.userprofile import UserProfile
 from scripts.helpers.singletons import dbClient, Bot
 
-WAIFU_RANKS = ["E", "D", "C", "B", "A", "S","SS", "SSS"]
-NO_FAV_WAIFU_URL = "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu.png"
-WAIFU_LIST_WAIFUS_PER_PAGE = 5
 
 # returns a waifu based on MAL character id
 def getWaifu(MAL_charID):
@@ -18,19 +16,14 @@ def waifuCount():
 
 # Returns a list with the ranking list sorted by descending total waifu value
 def getWaifuRankingList():
-	waifuDocs = list(dbClient.getClient().DBot.waifu.find({}))
-	waifuProfiles = [WaifuProfile.load(Bot.getBot().get_user(waifuDoc["user"]["id"])) for waifuDoc in waifuDocs]
-
-	waifuDictRankedList = [{"profile": waifuProfile, "totalValue": waifuProfile.getTotalValue()} for waifuProfile in waifuProfiles]
-	waifuDictRankedList.sort(key=lambda waifuDict: len(waifuDict["profile"].waifuList))
-	waifuDictRankedList.sort(key=lambda waifuDict: waifuDict["totalValue"], reverse=True)
-	
-	waifuRankedList = [waifuDict["profile"] for waifuDict in waifuDictRankedList]
-	return waifuRankedList
+	userProfiles = UserProfile.getAllUsers()
+	userProfiles.sort(key=lambda profile: len(profile.waifuList), reverse=True)
+	userProfiles.sort(key=lambda profile: profile.waifuGetTotalValue(), reverse=True)
+	return userProfiles
 
 # Returns the position in the ranking of an user (indexing from 1)
 def getWaifuRankingPosition(user):
-	WaifuProfile.load(user)
+	UserProfile.load(user)
 	waifuRankingList = getWaifuRankingList()
 	position = 1
 	for waifuProfile in waifuRankingList:
@@ -64,41 +57,21 @@ def getSummonRank():
 
 # returns a random waifu based on rank weights
 def getRandomWaifu():
-	# Probability per rank
-	pSSS = 0.0028
-	pSS  = 0.0112
-	pS   = 0.056
-	pA   = 0.07998
-	pB   = 0.11997
-	pC   = 0.16926
-	pD   = 0.25389
-	pE   = 0.3069
-	
-	# Cumulative probability per rank
-	aSSS = pSSS
-	aSS  = aSSS + pSS
-	aS   = aSS  + pS
-	aA   = aS   + pA
-	aB   = aA   + pB
-	aC   = aB   + pC
-	aD   = aC   + pD
-	aE   = aD   + pE
-
 	# rank selection
 	r = random.random()
-	if   0    <= r < aSSS:
+	if   0    <= r < waifu_const.aSSS:
 		rank = "SSS"
-	elif aSSS <= r < aSS:
+	elif waifu_const.aSSS <= r < waifu_const.aSS:
 		rank = "SS"
-	elif aSS  <= r < aS:
+	elif waifu_const.aSS  <= r < waifu_const.aS:
 		rank ="S"
-	elif aS   <= r < aA:
+	elif waifu_const.aS   <= r < waifu_const.aA:
 		rank = "A"
-	elif aA   <= r < aB:
+	elif waifu_const.aA   <= r < waifu_const.aB:
 		rank = "B"
-	elif aB   <= r < aC:
+	elif waifu_const.aB   <= r < waifu_const.aC:
 		rank = "C"
-	elif aC   <= r < aD:
+	elif waifu_const.aC   <= r < waifu_const.aD:
 		rank = "D"
 	else:
 		rank = "E"

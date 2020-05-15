@@ -11,7 +11,7 @@ import random
 
 from scripts.events.Event import Event
 from scripts.helpers.aux_f import utcNow
-from scripts.models.economy import EcoProfile
+from scripts.models.userprofile import UserProfile
 import scripts.autism_fAux as autism_fAux
 import scripts.economy_fAux as economy_fAux
 
@@ -64,7 +64,7 @@ class chocheEvent(Event):
 
 	def eventStop(self):
 		if self.winnerUser != None:
-			EcoProfile.load(self.winnerUser).changeBalance(self.prize)
+			UserProfile.load(self.winnerUser).ecoChangeBalance(self.prize, forced=True)
 
 		self.status = False
 		self.setTimeStart(self.minWait, self.maxWait)

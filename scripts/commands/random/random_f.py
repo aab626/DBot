@@ -1,6 +1,6 @@
 import discord
 
-import scripts.random_fAux as random_fAux
+import scripts.commands.random.random_fAux as random_fAux
 
 def dice_f(diceArgs):
     if len(diceArgs) == 0:

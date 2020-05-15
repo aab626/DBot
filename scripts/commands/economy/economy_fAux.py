@@ -1,17 +1,6 @@
 import random
 
-#############
-# CONSTANTS
-
-CURRENCY_SYMBOL = "D\U000000A2"
-CURRENCY_NAME_SINGULAR = "DCoin"
-CURRENCY_NAME_PLURAL = "DCoins"
-
-LOTTERY_NUMBERS_IN_POOL = 17
-LOTTERY_NUMBERS_TO_DRAW = 10
-LOTTERY_PRIZE_DICTIONARY = {10: 100, 9: 50, 8: 15, 7: 10}
-LOTTERY_MAX_GAMES_ALLOWED = 15
-LOTTERY_COST = 5
+import scripts.commands.economy.economy_const as economy_const
 
 ####################################
 # GENERAL ECONOMY FUNCTIONS
@@ -23,10 +12,10 @@ LOTTERY_COST = 5
 def pMoney(amount, mode="simple"):
     # verbose
     if mode == "verbose":
-        return "{} {}".format(amount, CURRENCY_NAME_PLURAL if amount > 1 else CURRENCY_NAME_SINGULAR)
+        return "{} {}".format(amount, economy_const.CURRENCY_NAME_PLURAL if amount > 1 else economy_const.CURRENCY_NAME_SINGULAR)
     # simple (default)
     else:
-        return "{} {}".format(amount, CURRENCY_SYMBOL)
+        return "{} {}".format(amount, economy_const.CURRENCY_SYMBOL)
 
 
 ####################################
@@ -36,8 +25,8 @@ def pMoney(amount, mode="simple"):
 # Generates a ticket for the lottery
 def generateTicket():
     ticket = []
-    while len(ticket) < LOTTERY_NUMBERS_TO_DRAW:
-        n = random.randint(1, LOTTERY_NUMBERS_IN_POOL)
+    while len(ticket) < economy_const.LOTTERY_NUMBERS_TO_DRAW:
+        n = random.randint(1, economy_const.LOTTERY_NUMBERS_IN_POOL)
         if n in ticket:
             continue
         else:
@@ -63,7 +52,7 @@ def gameLottery(gamesToPlay):
             continue
 
         hits = checkTicket(ticket, winningTicket)
-        prize = LOTTERY_PRIZE_DICTIONARY[hits] if hits in LOTTERY_PRIZE_DICTIONARY.keys(
+        prize = economy_const.LOTTERY_PRIZE_DICTIONARY[hits] if hits in economy_const.LOTTERY_PRIZE_DICTIONARY.keys(
         ) else 0
 
         lotteryDict = {"ticket": ticket, "hits": hits, "prize": prize}

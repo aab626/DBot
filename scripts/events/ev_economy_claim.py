@@ -2,8 +2,9 @@ import discord
 
 from scripts.events.Event import Event
 from scripts.helpers.aux_f import utcNow
-from scripts.models.economy import EcoProfile
+from scripts.models.userprofile import UserProfile
 import scripts.economy_fAux as economy_fAux
+import scripts.economy_const as economy_const
 
 class claimEvent(Event):
 	def __init__(self, name, channel,
@@ -32,7 +33,7 @@ class claimEvent(Event):
 		self.setTimeEnd(self.duration)
 
 	async def eventPublishStart(self):
-		embed = discord.Embed(title="Money event!", description="Grab some {} with >eco claim".format(economy_fAux.CURRENCY_NAME_PLURAL))
+		embed = discord.Embed(title="Money event!", description="Grab some {} with >eco claim".format(economy_const.CURRENCY_NAME_PLURAL))
 		await self.channel.send("@here", embed=embed)
 
 	def endCondition(self):
@@ -70,7 +71,7 @@ class claimEvent(Event):
 		if len(self.users) > 0:
 			for user in self.prizeDict.keys():
 				print(type(user), user, self.prizeDict[user])
-				EcoProfile.load(user).changeBalance(self.prizeDict[user], forced=True)
+				UserProfile.load(user).ecoChangeBalance(self.prizeDict[user], forced=True)
 
 		self.status = False
 		self.setTimeStart(self.minWait, self.maxWait)

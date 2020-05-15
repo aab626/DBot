@@ -8,9 +8,9 @@ from PIL import Image, GifImagePlugin
 
 from scripts.helpers.singletons import Bot, dbClient, EventManager
 from scripts.helpers.aux_f import scheduleDeleteFile
-import scripts.autism_fAux as autism_fAux
+import scripts.commands.autism.autism_fAux as autism_fAux
 
-def letter_moment(message):
+def letter_moment_f(message):
 	if len(message.content) == 2:
 		if message.content[0] == Bot.getBot().command_prefix and message.content[1] in string.ascii_uppercase:
 			msgDict = autism_fAux.letterMoment(message)

@@ -1,7 +1,7 @@
 from discord.ext import commands
 
-import scripts.economy_fAux as economy_fAux
-import scripts.waifu_f as waifu_f
+import scripts.commands.economy.economy_fAux as economy_fAux
+import scripts.commands.waifu.waifu_f as waifu_f
 from scripts.events.ev_waifu_auctionhouse import waifuAuctionHouseEvent
 from scripts.helpers.aux_f import inssuficientPermissions
 
@@ -42,7 +42,7 @@ class Waifu(commands.Cog):
 	#		@User	must be a mention, only for admins
 	@waifu.command()
 	async def list(self, ctx, *args):
-		code = waifu_f.waifu_list_f(ctx, args)
+		code = waifu_f.list_f(ctx, args)
 		if code == -1:
 			await ctx.send("{}, you can enter at most one page number.".format(ctx.author.mention))
 		elif code == -2:
@@ -61,7 +61,7 @@ class Waifu(commands.Cog):
 
 	@waifu.command()
 	async def bid(self, ctx, bidAmount: int = 0):
-		code = waifu_f.waifu_bid_f(ctx.author, bidAmount)
+		code = waifu_f.bid_f(ctx.author, bidAmount)
 		if code == -1:
 			await ctx.send("{}, this event is not active right now.".format(ctx.author.mention))
 		elif code == -2:
@@ -80,7 +80,7 @@ class Waifu(commands.Cog):
 
 	@waifu.command(aliases=["fav"])
 	async def favorite(self, ctx, favArg):
-		code = waifu_f.waifu_favorite_f(ctx.author, favArg)
+		code = waifu_f.favorite_f(ctx.author, favArg)
 		print(code)
 		if code == -1:
 			await ctx.send("{}, you do not have this waifu in your waifu list.".format(ctx.author.mention))
@@ -93,12 +93,12 @@ class Waifu(commands.Cog):
 
 	@waifu.command(aliases=["top"])
 	async def ranking(self, ctx, rankArg=None):
-		embed = waifu_f.waifu_ranking_f(ctx.author, rankArg)
+		embed = waifu_f.ranking_f(ctx.author, rankArg)
 		await ctx.send("", embed=embed)
 
 	@waifu.command(aliases=["fusion"])
 	async def fuse(self, ctx, waifuID1: int, waifuID2: int, waifuID3: int):
-		code = waifu_f.waifu_fuse_f(ctx.author, waifuID1, waifuID2, waifuID3)
+		code = waifu_f.fuse_f(ctx.author, waifuID1, waifuID2, waifuID3)
 		if code == -1:
 			await ctx.send("{}, One of the Waifu IDs you entered is not in your list.".format(ctx.author.mention))
 		elif code == -2:
@@ -111,7 +111,7 @@ class Waifu(commands.Cog):
 
 	@waifu.command()
 	async def summon(self, ctx):
-		code = waifu_f.waifu_summon_f(ctx.author)
+		code = waifu_f.summon_f(ctx.author)
 		if code == -1:
 			await ctx.send("{}, you can summon only once per day.".format(ctx.message.author.mention))
 		else:
