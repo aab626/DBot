@@ -1,9 +1,10 @@
-import random
-import datetime
 import asyncio
+import datetime
+import random
 
-from scripts.helpers.aux_f import TIMEZONE, utcNow, log, activityIn
-from scripts.helpers.singletons import EventManager, Bot
+from scripts.helpers.aux_f import TIMEZONE, activityIn, log, utcNow
+from scripts.helpers.singletons import Bot, EventManager
+
 
 class Event:
 	def __init__(self, name, channel, 
