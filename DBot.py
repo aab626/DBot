@@ -87,7 +87,7 @@ async def on_message(message):
 
     # Self-invoked commands kills the command execution
     selfInvokedCommand = False
-    if await scripts.autism_commands.on_message(message) == 0:
+    if await autism_commands.on_message(message) == 0:
         selfInvokedCommand = True
 
     # Commands

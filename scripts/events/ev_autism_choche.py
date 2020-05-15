@@ -12,8 +12,8 @@ import random
 from scripts.events.Event import Event
 from scripts.helpers.aux_f import utcNow
 from scripts.models.userprofile import UserProfile
-import scripts.autism_fAux as autism_fAux
-import scripts.economy_fAux as economy_fAux
+import scripts.commands.autism.autism_fAux as autism_fAux
+import scripts.commands.economy.economy_fAux as economy_fAux
 
 class chocheEvent(Event):
 	def __init__(self, name, channel,

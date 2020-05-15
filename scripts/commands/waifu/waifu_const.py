@@ -23,12 +23,12 @@ aE   = aD   + pE
 
 # Waifu list settings
 NO_FAV_WAIFU_URLS = [
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu1.png",
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu2.png"
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu3.png"
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu4.png"
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu5.png"
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu6.png"
-    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu7.png"
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu1.png",
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu2.png",
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu3.png",
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu4.png",
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu5.png",
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu6.png",
+    "https://raw.githubusercontent.com/drizak/DBot/master/static/noFavWaifu/noFavWaifu7.png"
 ]
 WAIFU_LIST_WAIFUS_PER_PAGE = 5

@@ -3,8 +3,8 @@ import discord
 from scripts.events.Event import Event
 from scripts.helpers.aux_f import utcNow
 from scripts.models.userprofile import UserProfile
-import scripts.economy_fAux as economy_fAux
-import scripts.economy_const as economy_const
+import scripts.commands.economy.economy_fAux as economy_fAux
+import scripts.commands.economy.economy_const as economy_const
 
 class claimEvent(Event):
 	def __init__(self, name, channel,

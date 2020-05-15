@@ -81,7 +81,6 @@ class Waifu(commands.Cog):
 	@waifu.command(aliases=["fav"])
 	async def favorite(self, ctx, favArg):
 		code = waifu_f.favorite_f(ctx.author, favArg)
-		print(code)
 		if code == -1:
 			await ctx.send("{}, you do not have this waifu in your waifu list.".format(ctx.author.mention))
 		elif code == -2:
