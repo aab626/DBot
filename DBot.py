@@ -17,6 +17,7 @@ import scripts.commands.economy.economy_commands as economy_commands
 import scripts.commands.google.google_commands as google_commands
 import scripts.commands.random.random_commands as random_commands
 import scripts.commands.waifu.waifu_commands as waifu_commands
+import scripts.commands.marketplace.marketplace_commands as marketplace_commands
 
 from scripts.helpers.aux_f import getEventChannel, isAdmin, log
 from scripts.helpers.singletons import Bot
@@ -54,6 +55,7 @@ async def on_ready():
     bot.add_cog(waifu_commands.Waifu(eventChannel))
     bot.add_cog(admin_commands.Admin(eventChannel))
     bot.add_cog(autism_commands.Autism(eventChannel))
+    bot.add_cog(marketplace_commands.Marketplace(eventChannel))
     # bot.add_cog(wargame_c.Wargame(bot, eventChannel))
     log("All cogs loaded")
 

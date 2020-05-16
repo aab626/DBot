@@ -7,6 +7,8 @@ from scripts.helpers.aux_f import TIMEZONE, utcNow, timeTZ
 import scripts.commands.economy.economy_const as economy_const
 
 class UserProfile:
+    loadedProfiles = []
+
     def __init__(self, user, timeCreation, ecoDict, waifuDict):
         # General user settings
         self.user = user
@@ -27,6 +29,10 @@ class UserProfile:
 
     @staticmethod
     def load(user):
+        matchingProfiles = [profile for profile in UserProfile.loadedProfiles if profile.user == user]
+        if len(matchingProfiles) == 1:
+            return matchingProfiles[0]
+
         mongoClient = dbClient.getClient()
         timeAware_UsersColl = mongoClient.DBot.users.with_options(
             codec_options=CodecOptions(tz_aware=True, tzinfo=TIMEZONE))
@@ -51,6 +57,7 @@ class UserProfile:
         if profileDoc is None:
             userProfile._save()
 
+        UserProfile.loadedProfiles.append(userProfile)
         return userProfile
 
     @staticmethod
@@ -117,7 +124,10 @@ class UserProfile:
         self._save_waifuList()
 
     def waifuCheck(self, waifu):
-        return waifu["MAL_data"]["charID"] in self.waifuList
+        if waifu is None:
+            return False
+        else:
+            return waifu["MAL_data"]["charID"] in self.waifuList
 
     def waifuGetTotalValue(self):
         waifus = list(dbClient.getClient().DBot.waifus.find({"MAL_data.charID": {"$in": self.waifuList}}))
@@ -201,6 +211,9 @@ class UserProfile:
 
     def _save_waifuList(self):
         dbClient.getClient().DBot.users.update_one({"user.id": self.user.id}, {"$set": {"waifuDict.waifuList": self.waifuList}})
+
+    # def _save_newWaifu(self, waifuID):
+    #     dbClient.getClient().DBot.users.update_one({"user.id": self.user.id}, {"$push": {"waifuDict.waifuList": waifuID}})
 
     def _save_waifuFavorite(self):
         dbClient.getClient().DBot.users.update_one({"user.id": self.user.id}, {"$set": {"waifuDict.waifuFavorite": self.waifuFavorite}})

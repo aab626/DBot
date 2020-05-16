@@ -51,7 +51,7 @@ class Waifu(commands.Cog):
 		elif code == -4:
 			await ctx.send("{}, you don't have any waifus yet.".format(ctx.author.mention))
 		elif code == -5:
-			await ctx.send("{}, {} do not have any waifus yet.".format(ctx.author.mention, ctx.mentions[0]))
+			await ctx.send("{}, {} do not have any waifus yet.".format(ctx.author.mention, ctx.message.mentions[0]))
 		elif code == -6:
 			await ctx.send("{}, this search returned no waifus!".format(ctx.author.mention))
 		else:
