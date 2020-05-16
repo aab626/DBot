@@ -121,6 +121,11 @@ class UserProfile:
 
     def waifuRemove(self, waifu):
         self.waifuList.remove(waifu["MAL_data"]["charID"])
+
+        # Check if fav waifu has been removed
+        if self.waifuFavorite not in self.waifuList:
+            self.waifuClearFavorite()
+
         self._save_waifuList()
 
     def waifuCheck(self, waifu):
@@ -211,9 +216,6 @@ class UserProfile:
 
     def _save_waifuList(self):
         dbClient.getClient().DBot.users.update_one({"user.id": self.user.id}, {"$set": {"waifuDict.waifuList": self.waifuList}})
-
-    # def _save_newWaifu(self, waifuID):
-    #     dbClient.getClient().DBot.users.update_one({"user.id": self.user.id}, {"$push": {"waifuDict.waifuList": waifuID}})
 
     def _save_waifuFavorite(self):
         dbClient.getClient().DBot.users.update_one({"user.id": self.user.id}, {"$set": {"waifuDict.waifuFavorite": self.waifuFavorite}})
