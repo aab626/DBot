@@ -32,11 +32,6 @@ def getWaifuRankingPosition(user):
 
 	return position
 
-# returns the number of waifu profiles in the database
-def getWaifuProfileCount():
-	profileCount = dbClient.getClient().DBot.waifu.count_documents({})
-	return profileCount
-
 # returns a random waifu of an specific rank
 def getRandomWaifuByRank(rank):
 	mongoClient = dbClient.getClient()

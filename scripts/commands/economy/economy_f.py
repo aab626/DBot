@@ -134,7 +134,7 @@ def ranking_f():
                           description="Top 5 based on total Balance.")
 
     mongoClient = dbClient.getClient()
-    userDocs = list(mongoClient.DBot.economy.find({}).sort("balance", pymongo.DESCENDING))
+    userDocs = list(mongoClient.DBot.users.find({}).sort("ecoDict.balance", pymongo.DESCENDING))
 
     selectedDocs = userDocs[:5]
     for userDoc in selectedDocs:

@@ -8,12 +8,45 @@ import pymongo
 import scripts.commands.economy.economy_fAux as economy_fAux
 import scripts.commands.waifu.waifu_fAux as waifu_fAux
 import scripts.commands.waifu.waifu_const as waifu_const
-from scripts.helpers.aux_f import isAdmin, utcNow, utcToTZ
+from scripts.helpers.aux_f import isAdmin, utcNow, utcToTZ, isMentionString, getIDfromMentionString, getUserProfileCount
 from scripts.helpers.singletons import Bot, EventManager, dbClient
 from scripts.models.userprofile import UserProfile
 
 ###########
 # FUNCTIONS
+
+# def list2_f(user, args):
+# 	# Parse args
+# 	userArgs = [arg for arg in args if "user:" in arg]
+# 	nameArgs = [arg for arg in args if "name:" in arg]
+# 	animeArgs = [arg for arg in args if "anime:" in arg]
+# 	rankArgs = [arg for arg in args if "rank:" in arg]
+# 	valueArgs = [arg for arg in args if "value=" in arg or "value>=" in arg or "value<=" in arg or "value<" in arg or "value>" in arg]
+
+# 	# Assemble queries
+	
+# 	# User query
+# 	userIDs = []
+# 	for userArg in userArgs:
+# 		possibleUserMention = userArg.split("user:")[1]
+# 		if isMentionString(possibleUserMention):
+# 			userIDs.append(getIDfromMentionString(possibleUserMention))
+	
+# 	nameQuery = {"user.id": {"$in": userIDs}}
+
+# 	# Char name query
+# 	nameList = [arg.split("name:") for arg in nameArgs]
+# 	nameQueries = []
+
+
+
+
+# 	nameQuery = [{"user.name": {"$regex": 4}]
+	
+
+	
+	# Get anime name args
+	
 
 def list_f(ctx, args):
 	# parse args
@@ -169,7 +202,7 @@ def favorite_f(user, favArg):
 def ranking_f(user, rankArg):
 	if rankArg == "me":
 		rankingPos = waifu_fAux.getWaifuRankingPosition(user)
-		rankingLength = waifu_fAux.getWaifuProfileCount()
+		rankingLength = getUserProfileCount()
 		embed = discord.Embed(title="Waifu Ranking", description="You are in position {}/{}.".format(rankingPos, rankingLength))
 	else:
 		embed = discord.Embed(title="Waifu Ranking", description="Top 5 based on Total Waifu Value.")

@@ -88,3 +88,20 @@ def getEventChannel():
 async def scheduleDeleteFile(path, time):
 	await asyncio.sleep(time)
 	os.remove(path)
+
+def isMentionString(string_):
+	if string_.startswith("<@") and string_.endswith(">") and string_.replace("<@","").replace(">","")[1:].isdigit():
+		return True
+	else:
+		return False
+
+def getIDfromMentionString(string_):
+	ID = ""
+	for c in string_:
+		if c.isdigit():
+			ID = ID + c
+	return int(ID)
+
+def getUserProfileCount():
+	profileCount = dbClient().getClient().DBot.users.count_documents({})
+	return profileCount
