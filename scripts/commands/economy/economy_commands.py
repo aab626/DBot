@@ -57,13 +57,14 @@ class Economy(commands.Cog):
 
     @eco.command(aliases=["welfare"])
     async def collect(self, ctx):
-        code = economy_f.collect_f(ctx.author)
-        if code == -1:
-            await ctx.send("{}, you can collect only once every day.".format(ctx.author.mention))
-        else:
-            embed = code
-            await ctx.send("", embed=embed)
-        return 0
+        await ctx.send("Under maintenance \U0001F64A")
+        # code = economy_f.collect_f(ctx.author)
+        # if code == -1:
+        #     await ctx.send("{}, you can collect only once every day.".format(ctx.author.mention))
+        # else:
+        #     embed = code
+        #     await ctx.send("", embed=embed)
+        # return 0
 
     @eco.command()
     async def claim(self, ctx):
