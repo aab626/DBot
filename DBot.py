@@ -87,6 +87,11 @@ async def on_message(message):
         if isAdmin(message.author) == False:
             return 0
 
+    # simp excluder
+    if message.content.startswith(">") and message.author.id == 399025429605908490:
+        await message.channel.send("SIMP")
+        return 0
+
     # Self-invoked commands kills the command execution
     selfInvokedCommand = False
     if await autism_commands.on_message(message) == 0:
